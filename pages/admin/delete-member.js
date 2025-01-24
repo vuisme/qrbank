@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { useRouter } from 'next/router';
+import { TextField, Button, Container, Typography, Box, Alert } from '@mui/material';
 
 export default function DeleteMember() {
   const [userid, setUserid] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -15,7 +17,6 @@ export default function DeleteMember() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Gửi request xóa thành viên lên server (thông qua API route)
     const response = await fetch('/api/admin/delete_member', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -24,28 +25,36 @@ export default function DeleteMember() {
 
     if (response.ok) {
       alert('Member deleted successfully!');
-      // Reset form
       setUserid('');
     } else {
-      alert('Failed to delete member.');
+      const errorData = await response.json();
+      setError(errorData.error || 'Failed to delete member');
     }
   };
 
   return (
     <AdminLayout>
-      <h1>Delete Member</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="userid">User ID:</label>
-          <input
-            type="text"
+      <Container maxWidth="sm">
+        <Typography variant="h4" component="h1" gutterBottom>
+          Delete Member
+        </Typography>
+        {error && <Alert severity="error">{error}</Alert>}
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="userid"
+            label="User ID"
+            name="userid"
             value={userid}
             onChange={(e) => setUserid(e.target.value)}
           />
-        </div>
-        <button type="submit">Delete Member</button>
-      </form>
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
+            Delete Member
+          </Button>
+        </Box>
+      </Container>
     </AdminLayout>
   );
 }

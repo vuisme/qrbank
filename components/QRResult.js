@@ -1,8 +1,16 @@
+import { Box } from '@mui/material';
+
 export default function QRResult({ qrData }) {
   return (
-    <div>
-      <h2>Generated QR Code</h2>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        mt: 2,
+      }}
+    >
       <img src={`data:image/png;base64,${qrData}`} alt="QR Code" />
-    </div>
+    </Box>
   );
 }

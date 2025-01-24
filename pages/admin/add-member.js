@@ -1,29 +1,47 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { useRouter } from 'next/router';
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Alert,
+} from '@mui/material';
 
 export default function AddMember() {
   const [userid, setUserid] = useState('');
   const [bank_code, setBankCode] = useState('');
   const [bank_account, setBankAccount] = useState('');
   const [usertype, setUsertype] = useState('free');
-  const [password, setPassword] = useState(''); // Thêm state cho password
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
     const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
     if (isAdminLoggedIn !== 'true') {
-        router.push('/admin/login');
+      router.push('/admin/login');
     }
   }, [router]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Gửi request thêm thành viên lên server (thông qua API route)
     const response = await fetch('/api/admin/add_member', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userid, bank_code, bank_account, usertype, password }), // Thêm password vào request body
+      body: JSON.stringify({
+        userid,
+        bank_code,
+        bank_account,
+        usertype,
+        password,
+      }),
     });
 
     if (response.ok) {
@@ -33,62 +51,80 @@ export default function AddMember() {
       setBankCode('');
       setBankAccount('');
       setUsertype('free');
-      setPassword(''); // Reset password
+      setPassword('');
     } else {
       const errorData = await response.json();
-      alert(`Failed to add member. Error: ${errorData.error}`);
+      setError(errorData.error || 'Failed to add member');
     }
   };
 
   return (
     <AdminLayout>
-      <h1>Add Member</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="userid">User ID:</label>
-          <input
-            type="text"
+      <Container maxWidth="sm">
+        <Typography variant="h4" component="h1" gutterBottom>
+          Add Member
+        </Typography>
+        {error && <Alert severity="error">{error}</Alert>}
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="userid"
+            label="User ID"
+            name="userid"
             value={userid}
             onChange={(e) => setUserid(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="bank_code">Bank Code:</label>
-          <input
-            type="text"
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="bank_code"
+            label="Bank Code"
+            name="bank_code"
             value={bank_code}
             onChange={(e) => setBankCode(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="bank_account">Bank Account:</label>
-          <input
-            type="text"
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="bank_account"
+            label="Bank Account"
+            name="bank_account"
             value={bank_account}
             onChange={(e) => setBankAccount(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="usertype">User Type:</label>
-          <select id="usertype" value={usertype} onChange={(e) => setUsertype(e.target.value)}>
-            <option value="free">Free</option>
-            <option value="paid">Paid</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="usertype-label">User Type</InputLabel>
+            <Select
+              labelId="usertype-label"
+              id="usertype"
+              value={usertype}
+              label="User Type"
+              onChange={(e) => setUsertype(e.target.value)}
+            >
+              <MenuItem value="free">Free</MenuItem>
+              <MenuItem value="paid">Paid</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
-        <button type="submit">Add Member</button>
-      </form>
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
+            Add Member
+          </Button>
+        </Box>
+      </Container>
     </AdminLayout>
   );
 }

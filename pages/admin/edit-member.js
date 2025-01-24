@@ -1,15 +1,27 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { useRouter } from 'next/router';
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Alert
+} from '@mui/material';
 
 export default function EditMember() {
-  const [userid, setUserid] = useState('');
   const [bank_code, setBankCode] = useState('');
   const [bank_account, setBankAccount] = useState('');
   const [usertype, setUsertype] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
-  const { id } = router.query; // Sửa lại: Lấy userid từ query parameter
+  const { id } = router.query;
 
   useEffect(() => {
     const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
@@ -17,20 +29,18 @@ export default function EditMember() {
       router.push('/admin/login');
     }
 
-    // Hàm fetch thông tin thành viên dựa vào userid
     const fetchMember = async () => {
       if (id) {
-        const response = await fetch(`/api/admin/get_member?userid=${id}`); // Sửa lại: Truyền userid vào query parameter
+        const response = await fetch(`/api/admin/get_member?userid=${id}`);
         if (response.ok) {
           const data = await response.json();
-          setUserid(data.userid);
           setBankCode(data.bank_code);
           setBankAccount(data.bank_account);
           setUsertype(data.usertype);
           // Không set password vào state
         } else {
           const errorData = await response.json();
-          alert(`Failed to fetch member. Error: ${errorData.error}`);
+          setError(errorData.error || 'Failed to fetch member');
         }
       }
     };
@@ -40,63 +50,83 @@ export default function EditMember() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Gửi request cập nhật lên server (thông qua API route)
     const response = await fetch('/api/admin/edit_member', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userid, bank_code, bank_account, usertype, password }), // Bao gồm password
+      body: JSON.stringify({
+        userid: id,
+        bank_code,
+        bank_account,
+        usertype,
+        password,
+      }),
     });
 
     if (response.ok) {
       alert('Member updated successfully!');
-      // Có thể redirect về trang danh sách thành viên
-      router.push('/admin/members'); 
+      router.push('/admin/members');
     } else {
       const errorData = await response.json();
-      alert(`Failed to update member. Error: ${errorData.error}`);
+      setError(errorData.error || 'Failed to update member');
     }
   };
 
   return (
     <AdminLayout>
-      <h1>Edit Member: {userid}</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="bank_code">Bank Code:</label>
-          <input
-            type="text"
+      <Container maxWidth="sm">
+        <Typography variant="h4" component="h1" gutterBottom>
+          Edit Member: {id}
+        </Typography>
+        {error && <Alert severity="error">{error}</Alert>}
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="bank_code"
+            label="Bank Code"
+            name="bank_code"
             value={bank_code}
             onChange={(e) => setBankCode(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="bank_account">Bank Account:</label>
-          <input
-            type="text"
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="bank_account"
+            label="Bank Account"
+            name="bank_account"
             value={bank_account}
             onChange={(e) => setBankAccount(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="usertype">User Type:</label>
-          <select id="usertype" value={usertype} onChange={(e) => setUsertype(e.target.value)}>
-            <option value="free">Free</option>
-            <option value="paid">Paid</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="password">Password (leave blank to keep unchanged):</label>
-          <input
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="usertype-label">User Type</InputLabel>
+            <Select
+              labelId="usertype-label"
+              id="usertype"
+              value={usertype}
+              label="User Type"
+              onChange={(e) => setUsertype(e.target.value)}
+            >
+              <MenuItem value="free">Free</MenuItem>
+              <MenuItem value="paid">Paid</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="normal"
+            fullWidth
+            name="password"
+            label="Password (leave blank to keep unchanged)"
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
-        <button type="submit">Update Member</button>
-      </form>
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
+            Update Member
+          </Button>
+        </Box>
+      </Container>
     </AdminLayout>
   );
 }
