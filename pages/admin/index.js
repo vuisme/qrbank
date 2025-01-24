@@ -30,6 +30,9 @@ export default function AdminDashboard() {
         <li>
           <Link href="/admin/delete-member">Delete Member</Link>
         </li>
+        <li>
+          <Link href="/admin/edit-member">Edit Member</Link> 
+        </li>
       </ul>
         <button onClick={handleLogout}>Logout</button>
     </AdminLayout>

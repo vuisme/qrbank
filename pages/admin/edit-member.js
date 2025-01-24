@@ -2,57 +2,65 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { useRouter } from 'next/router';
 
-export default function AddMember() {
+export default function EditMember() {
   const [userid, setUserid] = useState('');
   const [bank_code, setBankCode] = useState('');
   const [bank_account, setBankAccount] = useState('');
-  const [usertype, setUsertype] = useState('free');
-  const [password, setPassword] = useState(''); // Thêm state cho password
+  const [usertype, setUsertype] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
+  const { id } = router.query; // Lấy userid từ query parameter
 
   useEffect(() => {
     const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
     if (isAdminLoggedIn !== 'true') {
-        router.push('/admin/login');
+      router.push('/admin/login');
     }
-  }, [router]);
+
+    // Hàm fetch thông tin thành viên dựa vào userid
+    const fetchMember = async () => {
+      if (id) {
+        const response = await fetch(`/api/admin/get_member?userid=${id}`); // Tạo API get_member tương tự getUserData
+        if (response.ok) {
+          const data = await response.json();
+          setUserid(data.userid);
+          setBankCode(data.bank_code);
+          setBankAccount(data.bank_account);
+          setUsertype(data.usertype);
+          // Không set password vào state
+        } else {
+          const errorData = await response.json();
+          alert(`Failed to fetch member. Error: ${errorData.error}`);
+        }
+      }
+    };
+
+    fetchMember();
+  }, [id, router]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Gửi request thêm thành viên lên server (thông qua API route)
-    const response = await fetch('/api/admin/add_member', {
-      method: 'POST',
+    // Gửi request cập nhật lên server (thông qua API route)
+    const response = await fetch('/api/admin/edit_member', {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userid, bank_code, bank_account, usertype, password }), // Thêm password vào request body
+      body: JSON.stringify({ userid, bank_code, bank_account, usertype, password }), // Bao gồm password
     });
 
     if (response.ok) {
-      alert('Member added successfully!');
-      // Reset form
-      setUserid('');
-      setBankCode('');
-      setBankAccount('');
-      setUsertype('free');
-      setPassword(''); // Reset password
+      alert('Member updated successfully!');
+      // Có thể redirect về trang danh sách thành viên
+      // router.push('/admin/members'); 
     } else {
       const errorData = await response.json();
-      alert(`Failed to add member. Error: ${errorData.error}`);
+      alert(`Failed to update member. Error: ${errorData.error}`);
     }
   };
 
   return (
     <AdminLayout>
-      <h1>Add Member</h1>
+      <h1>Edit Member: {userid}</h1>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="userid">User ID:</label>
-          <input
-            type="text"
-            id="userid"
-            value={userid}
-            onChange={(e) => setUserid(e.target.value)}
-          />
-        </div>
         <div>
           <label htmlFor="bank_code">Bank Code:</label>
           <input
@@ -79,7 +87,7 @@ export default function AddMember() {
           </select>
         </div>
         <div>
-          <label htmlFor="password">Password:</label>
+          <label htmlFor="password">Password (leave blank to keep unchanged):</label>
           <input
             type="password"
             id="password"
@@ -87,7 +95,7 @@ export default function AddMember() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button type="submit">Add Member</button>
+        <button type="submit">Update Member</button>
       </form>
     </AdminLayout>
   );
