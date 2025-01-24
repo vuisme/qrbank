@@ -2,6 +2,7 @@ import AdminLayout from '../../components/AdminLayout';
 import { Typography, Button } from '@mui/material';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function AdminDashboard() {
   const router = useRouter();
