@@ -9,7 +9,7 @@ export default function EditMember() {
   const [usertype, setUsertype] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
-  const { id } = router.query; // Lấy userid từ query parameter
+  const { id } = router.query; // Sửa lại: Lấy userid từ query parameter
 
   useEffect(() => {
     const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
@@ -20,7 +20,7 @@ export default function EditMember() {
     // Hàm fetch thông tin thành viên dựa vào userid
     const fetchMember = async () => {
       if (id) {
-        const response = await fetch(`/api/admin/get_member?userid=${id}`); // Tạo API get_member tương tự getUserData
+        const response = await fetch(`/api/admin/get_member?userid=${id}`); // Sửa lại: Truyền userid vào query parameter
         if (response.ok) {
           const data = await response.json();
           setUserid(data.userid);
@@ -50,7 +50,7 @@ export default function EditMember() {
     if (response.ok) {
       alert('Member updated successfully!');
       // Có thể redirect về trang danh sách thành viên
-      // router.push('/admin/members'); 
+      router.push('/admin/members'); 
     } else {
       const errorData = await response.json();
       alert(`Failed to update member. Error: ${errorData.error}`);

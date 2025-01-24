@@ -26,7 +26,7 @@ export default function AdminLayout({ children }) {
             <Link href="/admin/delete-member">Delete Member</Link>
           </li>
           <li>
-              <Link href="/admin/edit-member">Edit Member</Link>
+            <Link href="/admin/members">Members</Link> {/* Thêm link này */}
           </li>
         </ul>
         <button onClick={handleLogout}>Logout</button>

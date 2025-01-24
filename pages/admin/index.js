@@ -1,22 +1,22 @@
 import AdminLayout from '../../components/AdminLayout';
 import Link from 'next/link';
-import {useEffect} from 'react';
-import {useRouter} from 'next/router';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 export default function AdminDashboard() {
-    const router = useRouter();
-    useEffect(() => {
-        const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
-        if (isAdminLoggedIn !== 'true') {
-          router.push('/admin/login');
-        }
-    }, [router]);
-    
-    const handleLogout = () => {
-        localStorage.removeItem('isAdminLoggedIn');
-        router.push('/admin/login');
-    };
-    
+  const router = useRouter();
+  useEffect(() => {
+    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
+    if (isAdminLoggedIn !== 'true') {
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAdminLoggedIn');
+    router.push('/admin/login');
+  };
+
   return (
     <AdminLayout>
       <h1>Admin Dashboard</h1>
@@ -31,10 +31,10 @@ export default function AdminDashboard() {
           <Link href="/admin/delete-member">Delete Member</Link>
         </li>
         <li>
-          <Link href="/admin/edit-member">Edit Member</Link> 
+          <Link href="/admin/members">Members</Link> {/* Thêm link này */}
         </li>
       </ul>
-        <button onClick={handleLogout}>Logout</button>
+      <button onClick={handleLogout}>Logout</button>
     </AdminLayout>
   );
 }
