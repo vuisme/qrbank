@@ -20,6 +20,7 @@ export default function GenerateQR() {
   const [bankName, setBankName] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [bankLogo, setBankLogo] = useState(null); // Thêm state bankLogo
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -35,6 +36,7 @@ export default function GenerateQR() {
         if (bankInfoRes.ok) {
           const bankInfo = await bankInfoRes.json();
           setBankName(bankInfo.shortName || bankInfo.name);
+          setBankLogo(bankInfo.logo); // Lấy logo từ bankInfo
         } else {
           setError('Failed to fetch bank info.');
         }
@@ -90,7 +92,7 @@ export default function GenerateQR() {
           }}
         >
           <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Mã QuickQR thanh toán
+            Quét mã QR để thanh toán
           </Typography>
 
           <Box
@@ -103,11 +105,16 @@ export default function GenerateQR() {
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
-              {/* Bạn có thể thay thế bằng logo của ngân hàng, tạm thời để icon loading */}
-              {isLoading ? (
+              {/* Hiển thị logo ngân hàng */}
+              {bankLogo ? (
+                <img src={bankLogo} alt={bankName} width={80} />
+              ) : isLoading ? (
                 <CircularProgress size={24} />
               ) : (
-                <img src={`/vietqr.png`} alt="VIETQR" width={80} />
+                <Typography variant="body1">
+                  {/* Thêm khoảng trắng để căn giữa */}
+                  &nbsp; 
+                </Typography>
               )}
             </Box>
             <Divider sx={{ mb: 2 }} />
@@ -124,7 +131,6 @@ export default function GenerateQR() {
                 Tên chủ TK:
               </Typography>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {/* Thêm phần này để hiển thị tên chủ tài khoản */}
                 {user ? user.toUpperCase() : ''}
               </Typography>
             </Box>
