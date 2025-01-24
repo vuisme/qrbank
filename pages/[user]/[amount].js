@@ -58,8 +58,8 @@ export default function GenerateQR() {
         });
 
         if (res.ok) {
-          const { qr_code_data } = await res.json(); // Sửa thành qr_code_data
-          setQrData(qr_code_data);
+          const { qrImage } = await res.json(); // Sửa thành qr_code_data
+          setQrData(qrImage);
         } else {
           const errorData = await res.json();
           setError(errorData.error || 'Failed to generate QR code.');
