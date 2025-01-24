@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Box,
+  Alert
+} from '@mui/material';
 
 export default function AdminLogin() {
   const [username, setUsername] = useState('');
@@ -17,40 +25,58 @@ export default function AdminLogin() {
     });
 
     if (response.ok) {
-      const data = await response.json();
       localStorage.setItem('isAdminLoggedIn', 'true');
       router.push('/admin');
     } else {
       const data = await response.json();
-      setError(data.error || 'Invalid username or password'); // Hiển thị lỗi từ server
+      setError(data.error || 'Invalid username or password');
     }
   };
 
   return (
-    <div>
-      <h1>Admin Login</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          Admin Login
+        </Typography>
+        {error && <Alert severity="error">{error}</Alert>}
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
+            autoFocus
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
             type="password"
             id="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-    </div>
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+            Login
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 }

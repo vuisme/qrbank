@@ -1,10 +1,11 @@
 import AdminLayout from '../../components/AdminLayout';
-import Link from 'next/link';
+import { Typography, Button } from '@mui/material';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 export default function AdminDashboard() {
   const router = useRouter();
+
   useEffect(() => {
     const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
     if (isAdminLoggedIn !== 'true') {
@@ -19,7 +20,9 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <h1>Admin Dashboard</h1>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Admin Dashboard
+      </Typography>
       <ul>
         <li>
           <Link href="/admin/settings">Settings</Link>
@@ -38,3 +41,5 @@ export default function AdminDashboard() {
     </AdminLayout>
   );
 }
+
+
