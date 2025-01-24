@@ -116,7 +116,7 @@ export default function GenerateQR() {
           }}
         >
           <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Mã VietQR thanh toán
+            Quét mã QR để thanh toán
           </Typography>
 
           <Box
@@ -192,7 +192,7 @@ export default function GenerateQR() {
           )}
 
           <Typography variant="caption" color="textSecondary" align="center">
-            Mở ứng dụng ngân hàng quét mã QR
+            Sản phẩm được cung cấp bởi VuTN.net
           </Typography>
         </Box>
       </Paper>
