@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     try {
       // Lấy thông tin người dùng từ database dựa vào userid
       const results = await query({
-        query: 'SELECT bank_code, bank_account FROM members WHERE userid = ?',
+        query: 'SELECT bank_code, bank_account FROM members WHERE userid = $1',
         values: [user],
       });
 

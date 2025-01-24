@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     try {
       // Thêm thành viên vào database
       await query({
-        query: 'INSERT INTO members (userid, bank_code, bank_account, usertype) VALUES (?, ?, ?, ?)',
+        query: 'INSERT INTO members (userid, bank_code, bank_account, usertype) VALUES ($1, $2, $3, $4)', // Đã sửa thành $1, $2, $3, $4
         values: [userid, bank_code, bank_account, usertype],
       });
       res.status(200).json({ message: 'Member added successfully.' });

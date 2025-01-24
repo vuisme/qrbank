@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     try {
       // Xóa thành viên khỏi database
       await query({
-        query: 'DELETE FROM members WHERE userid = ?',
+        query: 'DELETE FROM members WHERE userid = $1', // Đã sửa thành $1
         values: [userid],
       });
       res.status(200).json({ message: 'Member deleted successfully.' });

@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     try {
       // Cập nhật API key và API server vào database
       await query({
-        query: 'UPDATE settings SET api_key = ?, api_server = ? WHERE id = 1', // Giả sử id 1 là settings chính
+        query: 'UPDATE settings SET api_key = $1, api_server = $2 WHERE id = 1', // Giả sử id 1 là settings chính
         values: [apiKey, apiServer],
       });
       res.status(200).json({ message: 'Settings updated successfully.' });
