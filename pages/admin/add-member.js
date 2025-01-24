@@ -17,13 +17,13 @@ import {
 
 export default function AddMember() {
   const [userid, setUserid] = useState('');
-  const [bank_code, setBankCode] = useState('');
+  const [bank_code, setBankCode] = useState(''); // Giá trị bin sẽ được lưu vào đây
   const [bank_account, setBankAccount] = useState('');
   const [usertype, setUsertype] = useState('free');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [banks, setBanks] = useState([]); // Danh sách ngân hàng
-  const [selectedBank, setSelectedBank] = useState(null); // Ngân hàng được chọn
+  const [banks, setBanks] = useState([]);
+  const [selectedBank, setSelectedBank] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,7 +32,6 @@ export default function AddMember() {
       router.push('/admin/login');
     }
 
-    // Lấy danh sách ngân hàng từ API
     const fetchBanks = async () => {
       const response = await fetch('/api/banks');
       if (response.ok) {
@@ -48,12 +47,16 @@ export default function AddMember() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Lấy bin từ selectedBank
+    const selectedBin = selectedBank ? selectedBank.bin : '';
+
     const response = await fetch('/api/admin/add_member', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userid,
-        bank_code,
+        bank_code: selectedBin, // Lưu bin vào bank_code
         bank_account,
         usertype,
         password,
@@ -68,6 +71,7 @@ export default function AddMember() {
       setBankAccount('');
       setUsertype('free');
       setPassword('');
+      setSelectedBank(null);
     } else {
       const errorData = await response.json();
       setError(errorData.error || 'Failed to add member');
@@ -75,9 +79,9 @@ export default function AddMember() {
   };
 
   const handleBankChange = (event) => {
-    const selectedBankCode = event.target.value;
-    setBankCode(selectedBankCode);
-    const foundBank = banks.find((bank) => bank.bin === selectedBankCode);
+    const bankCode = event.target.value;
+    setBankCode(bankCode);
+    const foundBank = banks.find((bank) => bank.code === bankCode);
     setSelectedBank(foundBank);
   };
 
@@ -100,17 +104,17 @@ export default function AddMember() {
             onChange={(e) => setUserid(e.target.value)}
           />
           <FormControl fullWidth margin="normal">
-            <InputLabel id="bank_code-label">Ngân Hàng</InputLabel>
+            <InputLabel id="bank-label">Bank</InputLabel>
             <Select
-              labelId="bank_code-label"
-              id="bank_code"
+              labelId="bank-label"
+              id="bank"
               value={bank_code}
               label="Bank"
               onChange={handleBankChange}
             >
               {banks.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
-                  {bank.shortName} - {bank.name}
+                  {bank.name}
                 </MenuItem>
               ))}
             </Select>
@@ -131,13 +135,13 @@ export default function AddMember() {
             required
             fullWidth
             id="bank_account"
-            label="Số tài khoản"
+            label="Bank Account"
             name="bank_account"
             value={bank_account}
             onChange={(e) => setBankAccount(e.target.value)}
           />
           <FormControl fullWidth margin="normal">
-            <InputLabel id="usertype-label">Gói thành viên</InputLabel>
+            <InputLabel id="usertype-label">User Type</InputLabel>
             <Select
               labelId="usertype-label"
               id="usertype"
@@ -145,8 +149,8 @@ export default function AddMember() {
               label="User Type"
               onChange={(e) => setUsertype(e.target.value)}
             >
-              <MenuItem value="free">Miễn phí</MenuItem>
-              <MenuItem value="paid">Trả phí</MenuItem>
+              <MenuItem value="free">Free</MenuItem>
+              <MenuItem value="paid">Paid</MenuItem>
             </Select>
           </FormControl>
           <TextField

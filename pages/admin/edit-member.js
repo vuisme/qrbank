@@ -11,7 +11,8 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Alert
+  Alert,
+  Avatar,
 } from '@mui/material';
 
 export default function EditMember() {
@@ -20,6 +21,8 @@ export default function EditMember() {
   const [usertype, setUsertype] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [banks, setBanks] = useState([]);
+  const [selectedBank, setSelectedBank] = useState(null);
   const router = useRouter();
   const { id } = router.query;
 
@@ -34,10 +37,21 @@ export default function EditMember() {
         const response = await fetch(`/api/admin/get_member?userid=${id}`);
         if (response.ok) {
           const data = await response.json();
+          // Giữ nguyên giá trị bank_code, không cập nhật tự động
           setBankCode(data.bank_code);
           setBankAccount(data.bank_account);
           setUsertype(data.usertype);
-          // Không set password vào state
+
+          // Tìm ngân hàng tương ứng với bin đã lưu
+          const bankInfoRes = await fetch(`/api/banks`);
+          if (bankInfoRes.ok) {
+            const banksData = await bankInfoRes.json();
+            setBanks(banksData);
+            const foundBank = banksData.find((bank) => bank.bin === data.bank_code);
+            setSelectedBank(foundBank);
+          } else {
+            setError('Failed to fetch bank info.');
+          }
         } else {
           const errorData = await response.json();
           setError(errorData.error || 'Failed to fetch member');
@@ -48,14 +62,32 @@ export default function EditMember() {
     fetchMember();
   }, [id, router]);
 
+  useEffect(() => {
+    const fetchBanks = async () => {
+      const response = await fetch('/api/banks');
+      if (response.ok) {
+        const data = await response.json();
+        setBanks(data);
+      } else {
+        setError('Failed to fetch banks.');
+      }
+    };
+
+    fetchBanks();
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Lấy bin từ selectedBank
+    const selectedBin = selectedBank ? selectedBank.bin : '';
+
     const response = await fetch('/api/admin/edit_member', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userid: id,
-        bank_code,
+        bank_code: selectedBin, // Sử dụng bin thay vì bank_code
         bank_account,
         usertype,
         password,
@@ -71,6 +103,13 @@ export default function EditMember() {
     }
   };
 
+  const handleBankChange = (event) => {
+    const bankCode = event.target.value;
+    setBankCode(bankCode);
+    const foundBank = banks.find((bank) => bank.code === bankCode);
+    setSelectedBank(foundBank);
+  };
+
   return (
     <AdminLayout>
       <Container maxWidth="sm">
@@ -79,16 +118,33 @@ export default function EditMember() {
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="bank_code"
-            label="Bank Code"
-            name="bank_code"
-            value={bank_code}
-            onChange={(e) => setBankCode(e.target.value)}
-          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="bank-label">Bank</InputLabel>
+            <Select
+              labelId="bank-label"
+              id="bank"
+              value={bank_code}
+              label="Bank"
+              onChange={handleBankChange}
+            >
+              {banks.map((bank) => (
+                <MenuItem key={bank.id} value={bank.code}>
+                  {bank.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* Hiển thị logo và tên ngân hàng */}
+          {selectedBank && (
+            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+              <Avatar
+                src={selectedBank.logo}
+                alt={selectedBank.name}
+                sx={{ width: 40, height: 40, mr: 2 }}
+              />
+              <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
+            </Box>
+          )}
           <TextField
             margin="normal"
             required
