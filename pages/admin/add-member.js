@@ -12,6 +12,7 @@ import {
   FormControl,
   InputLabel,
   Alert,
+  Avatar,
 } from '@mui/material';
 
 export default function AddMember() {
@@ -21,6 +22,8 @@ export default function AddMember() {
   const [usertype, setUsertype] = useState('free');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [banks, setBanks] = useState([]); // Danh sách ngân hàng
+  const [selectedBank, setSelectedBank] = useState(null); // Ngân hàng được chọn
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +31,19 @@ export default function AddMember() {
     if (isAdminLoggedIn !== 'true') {
       router.push('/admin/login');
     }
+
+    // Lấy danh sách ngân hàng từ API
+    const fetchBanks = async () => {
+      const response = await fetch('/api/banks');
+      if (response.ok) {
+        const data = await response.json();
+        setBanks(data);
+      } else {
+        setError('Failed to fetch banks.');
+      }
+    };
+
+    fetchBanks();
   }, [router]);
 
   const handleSubmit = async (event) => {
@@ -58,6 +74,13 @@ export default function AddMember() {
     }
   };
 
+  const handleBankChange = (event) => {
+    const selectedBankCode = event.target.value;
+    setBankCode(selectedBankCode);
+    const foundBank = banks.find((bank) => bank.code === selectedBankCode);
+    setSelectedBank(foundBank);
+  };
+
   return (
     <AdminLayout>
       <Container maxWidth="sm">
@@ -76,16 +99,33 @@ export default function AddMember() {
             value={userid}
             onChange={(e) => setUserid(e.target.value)}
           />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="bank_code"
-            label="Bank Code"
-            name="bank_code"
-            value={bank_code}
-            onChange={(e) => setBankCode(e.target.value)}
-          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="bank_code-label">Bank</InputLabel>
+            <Select
+              labelId="bank_code-label"
+              id="bank_code"
+              value={bank_code}
+              label="Bank"
+              onChange={handleBankChange}
+            >
+              {banks.map((bank) => (
+                <MenuItem key={bank.id} value={bank.code}>
+                  {bank.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* Hiển thị logo và tên ngân hàng */}
+          {selectedBank && (
+            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+              <Avatar
+                src={selectedBank.logo}
+                alt={selectedBank.name}
+                sx={{ width: 40, height: 40, mr: 2 }}
+              />
+              <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
+            </Box>
+          )}
           <TextField
             margin="normal"
             required

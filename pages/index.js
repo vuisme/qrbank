@@ -29,7 +29,7 @@ export default function Home() {
         />
         <animated.div style={props}>
           <Typography variant="h3" component="h1" gutterBottom>
-            Chào mừng đến với QR Bank!
+            Chào mừng đến với QuickPay QR!
           </Typography>
           <Typography variant="h5" component="h2" gutterBottom>
             Tạo mã QR thanh toán ngân hàng nhanh chóng và dễ dàng!
