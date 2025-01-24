@@ -104,7 +104,7 @@ export default function AddMember() {
             onChange={(e) => setUserid(e.target.value)}
           />
           <FormControl fullWidth margin="normal">
-            <InputLabel id="bank-label">Bank</InputLabel>
+            <InputLabel id="bank-label">Ngân hàng</InputLabel>
             <Select
               labelId="bank-label"
               id="bank"
@@ -114,7 +114,7 @@ export default function AddMember() {
             >
               {banks.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
-                  {bank.name}
+                  {bank.shortName} - {bank.name}
                 </MenuItem>
               ))}
             </Select>

@@ -20,7 +20,28 @@ export default function GenerateQR() {
   const [bankName, setBankName] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [bankLogo, setBankLogo] = useState(null); // Thêm state bankLogo
+  const [bankLogo, setBankLogo] = useState(null);
+
+  // Hàm chuyển đổi chuỗi amount thành số
+  const parseAmount = (amountStr) => {
+    if (!amountStr) return 0;
+
+    const multiplier = {
+      k: 1000,
+      m: 1000000,
+      // Có thể thêm các đơn vị khác (ví dụ: b cho billion)
+    };
+
+    const lowerCaseAmount = amountStr.toLowerCase();
+    const lastChar = lowerCaseAmount.slice(-1);
+
+    if (multiplier[lastChar]) {
+      const numPart = parseFloat(lowerCaseAmount.slice(0, -1));
+      return numPart * multiplier[lastChar];
+    } else {
+      return parseFloat(amountStr);
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,11 +53,11 @@ export default function GenerateQR() {
         setBankCode(data.bank_code);
         setBankAccount(data.bank_account);
 
-        const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
+        const bankInfoRes = await fetch(`/api/bankInfo?bankCode=${data.bank_code}`);
         if (bankInfoRes.ok) {
           const bankInfo = await bankInfoRes.json();
           setBankName(bankInfo.shortName || bankInfo.name);
-          setBankLogo(bankInfo.logo); // Lấy logo từ bankInfo
+          setBankLogo(bankInfo.logo);
         } else {
           setError('Failed to fetch bank info.');
         }
@@ -56,13 +77,16 @@ export default function GenerateQR() {
       setIsLoading(true);
       setError(null);
       if (bankAccount && bankCode && amount) {
+        // Chuyển đổi amount string thành số
+        const numericAmount = parseAmount(amount);
+
         const res = await fetch('/api/qr', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             bankAccount,
             bankCode,
-            amount: parseFloat(amount),
+            amount: numericAmount, // Gửi số tiền đã chuyển đổi
           }),
         });
 
@@ -92,7 +116,7 @@ export default function GenerateQR() {
           }}
         >
           <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Quét mã QR để thanh toán
+            Mã VietQR thanh toán
           </Typography>
 
           <Box
@@ -112,8 +136,7 @@ export default function GenerateQR() {
                 <CircularProgress size={24} />
               ) : (
                 <Typography variant="body1">
-                  {/* Thêm khoảng trắng để căn giữa */}
-                  &nbsp; 
+                  &nbsp;
                 </Typography>
               )}
             </Box>
@@ -147,7 +170,8 @@ export default function GenerateQR() {
                 Số tiền:
               </Typography>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {parseFloat(amount).toLocaleString('vi-VN', {
+                {/* Sử dụng numericAmount để định dạng */}
+                {parseAmount(amount).toLocaleString('vi-VN', {
                   style: 'currency',
                   currency: 'VND',
                 })}
@@ -168,7 +192,7 @@ export default function GenerateQR() {
           )}
 
           <Typography variant="caption" color="textSecondary" align="center">
-            Sản phẩm được cung cấp bởi VuTN.Net
+            Mở ứng dụng ngân hàng quét mã QR
           </Typography>
         </Box>
       </Paper>

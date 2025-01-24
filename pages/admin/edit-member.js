@@ -129,7 +129,7 @@ export default function EditMember() {
             >
               {banks.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
-                  {bank.name}
+                  {bank.shortName} - {bank.name}
                 </MenuItem>
               ))}
             </Select>
