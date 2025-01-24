@@ -10,7 +10,12 @@ export default function QRResult({ qrData }) {
         mt: 2,
       }}
     >
-      <img src={`data:image/png;base64,${qrData}`} alt="QR Code" />
+      <img
+        src={`data:image/png;base64,${qrData}`}
+        alt="QR Code"
+        width={250}
+        height={250}
+      />
     </Box>
   );
 }
