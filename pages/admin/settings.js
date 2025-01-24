@@ -17,8 +17,13 @@ export default function Settings() {
       const res = await fetch('/api/admin/get_settings');
       if (res.ok) {
         const data = await res.json();
-        setApiKey(data.api_key);
-        setApiServer(data.api_server);
+        // Nếu có dữ liệu, điền vào state
+        if (data) {
+          setApiKey(data.api_key || ''); // Xử lý trường hợp null
+          setApiServer(data.api_server || ''); // Xử lý trường hợp null
+        }
+      } else {
+        console.error('Failed to fetch settings.');
       }
     };
     fetchSettings();
@@ -34,9 +39,13 @@ export default function Settings() {
     });
 
     if (response.ok) {
-      alert('Settings updated successfully!');
+      // Lấy thông báo từ response
+      const data = await response.json();
+      alert(data.message); // Hiển thị thông báo từ server
     } else {
-      alert('Failed to update settings.');
+      // Xử lý lỗi
+      const errorData = await response.json();
+      alert(`Failed to update settings. Error: ${errorData.error}`); // Hiển thị thông báo lỗi
     }
   };
 
