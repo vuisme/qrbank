@@ -168,7 +168,7 @@ export default function GenerateQR() {
           )}
 
           <Typography variant="caption" color="textSecondary" align="center">
-            Mở ứng dụng ngân hàng quét mã QR
+            Sản phẩm được cung cấp bởi VuTN.Net
           </Typography>
         </Box>
       </Paper>
