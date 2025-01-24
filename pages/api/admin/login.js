@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     try {
       // Lấy thông tin admin từ database
       const results = await query({
-        query: 'SELECT * FROM superadmin WHERE user = $1',
+        query: 'SELECT * FROM superadmin WHERE username = $1',
         values: [username],
       });
 
