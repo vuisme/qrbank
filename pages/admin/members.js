@@ -46,7 +46,7 @@ export default function Members() {
               <td>{member.bank_account}</td>
               <td>{member.usertype}</td>
               <td>
-                <Link href={`/admin/edit_member?id=${member.userid}`}>
+                <Link href={`/admin/edit-member?id=${member.userid}`}>
                   Edit
                 </Link>
               </td>
