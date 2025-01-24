@@ -77,7 +77,7 @@ export default function AddMember() {
   const handleBankChange = (event) => {
     const selectedBankCode = event.target.value;
     setBankCode(selectedBankCode);
-    const foundBank = banks.find((bank) => bank.code === selectedBankCode);
+    const foundBank = banks.find((bank) => bank.bin === selectedBankCode);
     setSelectedBank(foundBank);
   };
 
