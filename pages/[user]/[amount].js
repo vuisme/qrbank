@@ -54,10 +54,10 @@ export default function GenerateQR() {
   return (
     <Container maxWidth="sm">
       <Typography variant="h4" component="h1" gutterBottom>
-        Generate QR Code for {user}
+        Quét mã để thanh toán ID: {user}
       </Typography>
       <Typography variant="h6" component="h2" gutterBottom>
-        Amount: {amount}
+        Số tiền: {amount}
       </Typography>
       {qrData ? <QRResult qrData={qrData} /> : <Typography>Loading...</Typography>}
     </Container>
