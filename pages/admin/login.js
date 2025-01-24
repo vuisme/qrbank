@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 
 export default function AdminLogin() {
@@ -7,22 +7,22 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  useEffect(() => {
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
-    if (isAdminLoggedIn === 'true') {
-      router.push('/admin');
-    }
-  }, [router]);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Đây chỉ là ví dụ đơn giản, chưa có xác thực thực tế
-    if (username === 'admin' && password === 'password') {
-      // Lưu trạng thái đăng nhập vào localStorage
+
+    const response = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
       localStorage.setItem('isAdminLoggedIn', 'true');
       router.push('/admin');
     } else {
-      setError('Invalid username or password');
+      const data = await response.json();
+      setError(data.error || 'Invalid username or password'); // Hiển thị lỗi từ server
     }
   };
 
