@@ -32,7 +32,7 @@ export default function GenerateQR() {
         setBankCode(data.bank_code);
         setBankAccount(data.bank_account);
 
-        const bankInfoRes = await fetch(`/api/bankInfo?bankCode=${data.bank_code}`);
+        const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
         if (bankInfoRes.ok) {
           const bankInfo = await bankInfoRes.json();
           setBankName(bankInfo.shortName || bankInfo.name);
