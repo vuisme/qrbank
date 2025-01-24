@@ -100,7 +100,7 @@ export default function AddMember() {
             onChange={(e) => setUserid(e.target.value)}
           />
           <FormControl fullWidth margin="normal">
-            <InputLabel id="bank_code-label">Bank</InputLabel>
+            <InputLabel id="bank_code-label">Ngân Hàng</InputLabel>
             <Select
               labelId="bank_code-label"
               id="bank_code"
@@ -110,7 +110,7 @@ export default function AddMember() {
             >
               {banks.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
-                  {bank.name}
+                  {bank.shortName} - {bank.name}
                 </MenuItem>
               ))}
             </Select>
@@ -131,13 +131,13 @@ export default function AddMember() {
             required
             fullWidth
             id="bank_account"
-            label="Bank Account"
+            label="Số tài khoản"
             name="bank_account"
             value={bank_account}
             onChange={(e) => setBankAccount(e.target.value)}
           />
           <FormControl fullWidth margin="normal">
-            <InputLabel id="usertype-label">User Type</InputLabel>
+            <InputLabel id="usertype-label">Gói thành viên</InputLabel>
             <Select
               labelId="usertype-label"
               id="usertype"
@@ -145,8 +145,8 @@ export default function AddMember() {
               label="User Type"
               onChange={(e) => setUsertype(e.target.value)}
             >
-              <MenuItem value="free">Free</MenuItem>
-              <MenuItem value="paid">Paid</MenuItem>
+              <MenuItem value="free">Miễn phí</MenuItem>
+              <MenuItem value="paid">Trả phí</MenuItem>
             </Select>
           </FormControl>
           <TextField
