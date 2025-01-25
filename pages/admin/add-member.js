@@ -28,8 +28,8 @@ export default function AddMember() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
-    if (isAdminLoggedIn !== 'true') {
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
+    if (!tokenAdmin) {
       router.push('/admin/login');
     }
 

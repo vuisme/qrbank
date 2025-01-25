@@ -28,14 +28,18 @@ export default function EditMember() {
   const { id } = router.query;
 
   useEffect(() => {
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
-    if (isAdminLoggedIn !== 'true') {
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
+    if (!tokenAdmin) {
       router.push('/admin/login');
     }
 
     const fetchMember = async () => {
       if (id) {
-        const response = await fetch(`/api/admin/get_member?userid=${id}`);
+        const response = await fetch(`/api/admin/get_member?userid=${id}`, {
+          headers: {
+            Authorization: `Bearer ${tokenAdmin}`, // Gửi token trong header
+          },
+        });
         if (response.ok) {
           const data = await response.json();
           setBankCode(data.bank_code);
@@ -76,10 +80,10 @@ export default function EditMember() {
     event.preventDefault();
 
     const selectedBin = selectedBank ? selectedBank.bin : '';
-
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
     const response = await fetch('/api/admin/edit_member', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenAdmin}` },
       body: JSON.stringify({
         userid: id,
         bank_code: selectedBin,

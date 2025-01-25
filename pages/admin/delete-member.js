@@ -9,9 +9,9 @@ export default function DeleteMember() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
-    if (isAdminLoggedIn !== 'true') {
-        router.push('/admin/login');
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
+    if (!tokenAdmin) {
+      router.push('/admin/login');
     }
   }, [router]);
 
@@ -19,7 +19,10 @@ export default function DeleteMember() {
     event.preventDefault();
     const response = await fetch('/api/admin/delete_member', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${tokenAdmin}`, // Gửi token trong header
+      },
       body: JSON.stringify({ userid }),
     });
 
