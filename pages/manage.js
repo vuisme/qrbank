@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Container, Typography, Box, Alert } from '@mui/material';
-import AdminLayout from '../components/AdminLayout';
+import UserLayout from '../components/UserLayout'; // Import UserLayout
 
 export default function Manage() {
   const [user, setUser] = useState(null);
@@ -38,7 +38,7 @@ export default function Manage() {
   }, [router]);
 
   return (
-    <AdminLayout>
+    <UserLayout>
       <Container maxWidth="sm">
         <Typography variant="h4" component="h1" gutterBottom>
           Quản lý tài khoản
@@ -56,6 +56,6 @@ export default function Manage() {
           </Box>
         )}
       </Container>
-    </AdminLayout>
+    </UserLayout>
   );
 }
