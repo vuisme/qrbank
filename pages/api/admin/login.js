@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     try {
       // Lấy thông tin admin từ database (bảng superadmin)
       const results = await query({
-        query: 'SELECT * FROM superadmin WHERE username = $1',
+        query: 'SELECT * FROM superadmin WHERE user = $1',
         values: [username],
       });
 
@@ -27,14 +27,14 @@ export default async function handler(req, res) {
 
           res.status(200).json({ token });
         } else {
-          res.status(401).json({ error: 'Invalid password' });
+          res.status(401).json({ error: 'Invalid password' }); // Mật khẩu sai
         }
       } else {
-        res.status(404).json({ error: 'Admin user not found' });
+        res.status(404).json({ error: 'Admin user not found' }); // Không tìm thấy user
       }
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Failed to authenticate admin' });
+      res.status(500).json({ error: 'Failed to authenticate admin' }); // Lỗi chung
     }
   } else {
     res.setHeader('Allow', ['POST']);
