@@ -22,7 +22,6 @@ function Register({ recaptchaToken }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [bank_code, setBankCode] = useState('');
   const [bankCode, setBankCode] = useState('');
   const [bankAccount, setBankAccount] = useState('');
   const [error, setError] = useState('');
@@ -76,7 +75,7 @@ function Register({ recaptchaToken }) {
         password,
         email,
         name,
-        bank_code: selectedBin,
+        bankCode: selectedBin,
         bank_account: bankAccount,
         recaptcha: recaptchaToken
       }),
@@ -235,12 +234,12 @@ function Register({ recaptchaToken }) {
             Họ tên đầy đủ của cá nhân hoặc cửa hàng hiển thị ở trang mã QR.
           </FormHelperText>
           <FormControl fullWidth margin="normal">
-            <InputLabel id="bank-label">Bank</InputLabel>
+            <InputLabel id="bank-label">Ngân Hàng</InputLabel>
             <Select
               labelId="bank-label"
               id="bank"
-              value={bank_code}
-              label="Bank"
+              value={bankCode}
+              label="Ngân Hàng"
               onChange={handleBankChange}
             >
               {banks.map((bank) => (
