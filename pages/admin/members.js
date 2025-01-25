@@ -19,12 +19,17 @@ export default function Members() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
-    if (isAdminLoggedIn !== 'true') {
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
+    if (!tokenAdmin) {
       router.push('/admin/login');
     }
+
     const fetchMembers = async () => {
-      const response = await fetch('/api/admin/members');
+      const response = await fetch('/api/admin/members', {
+        headers: {
+          Authorization: `Bearer ${tokenAdmin}`, // Gửi token trong header
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         setMembers(data);
@@ -36,13 +41,14 @@ export default function Members() {
     fetchMembers();
   }, [router]);
 
- const handleDelete = async (userid) => {
+  const handleDelete = async (userid) => {
     if (confirm(`Bạn có chắc chắn muốn xóa thành viên ${userid}?`)) {
+      const tokenAdmin = localStorage.getItem('tokenAdmin'); // Lấy token
       const response = await fetch('/api/admin/delete_member', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('tokenAdmin')}`,
+          Authorization: `Bearer ${tokenAdmin}`, // Gửi token trong header
         },
         body: JSON.stringify({ userid }),
       });
@@ -66,7 +72,7 @@ export default function Members() {
           <TableHead>
             <TableRow>
               <TableCell>User ID</TableCell>
-              <TableCell>Name</TableCell> {/* Thêm cột name */}
+              <TableCell>Name</TableCell>
               <TableCell>Bank Code</TableCell>
               <TableCell>Bank Account</TableCell>
               <TableCell>User Type</TableCell>
@@ -79,7 +85,7 @@ export default function Members() {
                 <TableCell component="th" scope="row">
                   {member.userid}
                 </TableCell>
-                <TableCell>{member.name}</TableCell> {/* Hiển thị name */}
+                <TableCell>{member.name}</TableCell>
                 <TableCell>{member.bank_code}</TableCell>
                 <TableCell>{member.bank_account}</TableCell>
                 <TableCell>{member.usertype}</TableCell>
@@ -89,6 +95,7 @@ export default function Members() {
                     color="primary"
                     component={Link}
                     href={`/admin/edit-member?id=${member.userid}`}
+                    sx={{ mr: 1 }}
                   >
                     Edit
                   </Button>

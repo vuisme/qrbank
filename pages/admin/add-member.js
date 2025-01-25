@@ -50,10 +50,10 @@ export default function AddMember() {
     event.preventDefault();
 
     const selectedBin = selectedBank ? selectedBank.bin : '';
-
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
     const response = await fetch('/api/admin/add_member', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenAdmin}` },
       body: JSON.stringify({
         userid,
         bank_code: selectedBin,
