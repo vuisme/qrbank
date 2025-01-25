@@ -43,6 +43,7 @@ export default function Settings() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
     const response = await fetch('/api/admin/update_settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenAdmin}` },
