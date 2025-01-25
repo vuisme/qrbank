@@ -110,7 +110,7 @@ export default function EditMember() {
     const newBankCode = event.target.value;
     console.log("handleBankChange - newBankCode:", newBankCode); // Log giá trị bankCode
     setBankCode(newBankCode);
-    const foundBank = banks.find((bank) => bank.code === newBankCode);
+    const foundBank = banks.find((bank) => bank.bin === newBankCode);
     console.log("handleBankChange - foundBank:", foundBank); // Log giá trị foundBank
     setSelectedBank(foundBank);
   };
