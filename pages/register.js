@@ -13,8 +13,9 @@ import {
   MenuItem,
   FormHelperText,
 } from '@mui/material';
+import withReCAPTCHA from '../components/withReCAPTCHA';
 
-export default function Register() {
+function Register({ recaptchaToken }) {
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -74,6 +75,7 @@ export default function Register() {
         name,
         bank_code: bankCode,
         bank_account: bankAccount,
+        recaptcha: recaptchaToken
       }),
     });
 
@@ -198,7 +200,7 @@ export default function Register() {
             Họ tên đầy đủ của cá nhân hoặc cửa hàng hiển thị ở trang mã QR.
           </FormHelperText>
           <FormControl fullWidth margin="normal">
-            <InputLabel id="bank-code-label">Bank</InputLabel>
+            <InputLabel id="bank-code-label">Ngân Hàng</InputLabel>
             <Select
               labelId="bank-code-label"
               id="bank-code"
@@ -234,3 +236,5 @@ export default function Register() {
     </Container>
   );
 }
+
+export default withReCAPTCHA(Register, 'register');
