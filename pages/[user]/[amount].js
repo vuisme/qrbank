@@ -49,7 +49,11 @@ export default function GenerateQR() {
     const fetchUserData = async () => {
       setIsLoading(true);
       setError(null);
-      const res = await fetch(`/api/getUserData?user=${user}`);
+      const res = await fetch(`/api/getUserData`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: user }),
+      });
       const data = await res.json();
       if (res.ok && data) {
         setBankCode(data.bank_code);
@@ -126,7 +130,7 @@ export default function GenerateQR() {
           }}
         >
           <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Mã VietQR thanh toán
+            Quét Mã QR Để Thanh Toán
           </Typography>
 
           <Box
@@ -201,7 +205,7 @@ export default function GenerateQR() {
           )}
 
           <Typography variant="caption" color="textSecondary" align="center">
-            Mở ứng dụng ngân hàng quét mã QR
+            Cung cấp bởi VuTN.net
           </Typography>
         </Box>
       </Paper>
