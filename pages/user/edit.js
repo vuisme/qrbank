@@ -13,7 +13,6 @@ import {
   MenuItem,
   Avatar
 } from '@mui/material';
-import { getCachedBankList } from '../../lib/db';
 import UserLayout from '../../components/UserLayout';
 
 export default function EditUser() {
