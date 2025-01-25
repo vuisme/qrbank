@@ -1,18 +1,23 @@
 import { generateQRCodeData } from '../../lib/api';
 import { getCachedBankList } from '../../lib/db';
 import QRCode from 'qrcode';
-import Redis from 'ioredis';
-
-const redis = new Redis(process.env.REDIS_URL); // Tạo Redis client
+import { verifyRecaptcha } from '../../lib/api';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { bankAccount, bankCode, amount, user, recaptcha } = req.body; // Thêm user
-
-    // Verify reCAPTCHA (nếu cần)
-    // ...
-
+    const { bankAccount, bankCode, amount, recaptcha } = req.body;
+    if (!recaptcha) {
+        return res.status(400).json({ error: 'reCAPTCHA token is required.' });
+    }
+      
     try {
+      // Verify reCAPTCHA token
+      const isRecaptchaValid = await verifyRecaptcha(recaptcha);
+
+      if (!isRecaptchaValid) {
+        return res.status(400).json({ error: 'reCAPTCHA verification failed.' });
+      }
+
       // Lấy danh sách ngân hàng từ cache để tìm bankBin
       const banks = await getCachedBankList();
       const bank = banks.find((b) => b.bin === bankCode);
@@ -25,30 +30,12 @@ export default async function handler(req, res) {
       const qrCodeData = await generateQRCodeData({
         bankBin: bank.bin,
         bankNumber: bankAccount,
-        amount,
+        amount: amount,
         purpose: 'Thanh toan QR',
       });
 
       // Chuyển đổi QR code text thành data URL của ảnh PNG
       const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
-
-      // Tạo key cho Redis (user:amount)
-      const redisKey = `${user}:${amount}`;
-
-      // Lưu dữ liệu vào Redis với thời hạn 1 ngày (86400 giây)
-      await redis.set(
-        redisKey,
-        JSON.stringify({
-          qrCodeBase64,
-          bankName: bank.shortName || bank.name,
-          bankLogo: bank.logo,
-          bankAccount,
-          amount,
-          userName: user // Thông tin user (tùy chỉnh)
-        }),
-        'EX',
-        86400
-      );
 
       res.status(200).json({ qr_code_data: qrCodeBase64 });
     } catch (error) {
