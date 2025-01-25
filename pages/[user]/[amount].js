@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import QRResult from '../../components/QRResult';
-import { generateQRCodeData } from '../../lib/api';
 import {
   Container,
   Typography,
@@ -11,6 +10,10 @@ import {
   Divider,
   Paper,
 } from '@mui/material';
+import { generateQRCodeData } from '../../lib/api';
+import Redis from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URL); // Tạo Redis client
 
 export default function GenerateQR() {
   const router = useRouter();
@@ -21,7 +24,7 @@ export default function GenerateQR() {
   const [bankName, setBankName] = useState('');
   const [userName, setUserName] = useState('');
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Bắt đầu với false
   const [bankLogo, setBankLogo] = useState(null);
 
   // Hàm chuyển đổi chuỗi amount thành số
@@ -46,39 +49,62 @@ export default function GenerateQR() {
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       setError(null);
-      const res = await fetch(`/api/getUserData`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: user }),
-      });
-      const data = await res.json();
-      if (res.ok && data) {
-        setBankCode(data.bank_code);
-        setBankAccount(data.bank_account);
-        setUserName(data.name);
 
-        // Lấy thông tin ngân hàng từ bankCode đã có (sử dụng bin)
-        const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
-        if (bankInfoRes.ok) {
-          const bankInfo = await bankInfoRes.json();
-          setBankName(bankInfo.shortName || bankInfo.name);
-          setBankLogo(bankInfo.logo);
-        } else {
-          setError('Failed to fetch bank info.');
+      // Tạo key cho Redis
+      const redisKey = `${user}:${amount}`;
+
+      try {
+        // Thử lấy dữ liệu từ Redis
+        const cachedData = await redis.get(redisKey);
+        if (cachedData) {
+          const data = JSON.parse(cachedData);
+          setQrData(data.qrData);
+          setBankName(data.bankName);
+          setBankLogo(data.bankLogo);
+          setBankAccount(data.bankAccount);
+          setUserName(data.userName);
+          setIsLoading(false);
+          return; // Kết thúc nếu lấy được từ cache
         }
-      } else {
-        setError(data?.error || 'User not found.');
+
+        // Nếu không có trong cache, fetch từ API
+        const res = await fetch(`/api/getUserData`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: user }),
+        });
+        const data = await res.json();
+        if (res.ok && data) {
+          setBankCode(data.bank_code);
+          setBankAccount(data.bank_account);
+          setUserName(data.name);
+
+          const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
+          if (bankInfoRes.ok) {
+            const bankInfo = await bankInfoRes.json();
+            setBankName(bankInfo.shortName || bankInfo.name);
+            setBankLogo(bankInfo.logo);
+          } else {
+            setError('Failed to fetch bank info.');
+          }
+        } else {
+          setError(data?.error || 'User not found.');
+        }
+      } catch (error) {
+        console.error(error);
+        setError('Failed to load data.');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
-    if (user) {
-      fetchUserData();
+    if (user && amount) {
+      fetchData();
     }
-  }, [user]);
+  }, [user, amount]);
 
   useEffect(() => {
     const generateQR = async () => {
@@ -96,12 +122,14 @@ export default function GenerateQR() {
               bankAccount,
               bankCode,
               amount: numericAmount,
+              user, // Thêm user và amount vào request body
+              amount,
             }),
           });
 
           if (res.ok) {
             const { qr_code_data } = await res.json();
-            setQrData(qr_code_data); // Nhận trực tiếp base64 data
+            setQrData(qr_code_data);
           } else {
             const errorData = await res.json();
             setError(errorData.error || 'Failed to generate QR code.');

@@ -1,10 +1,13 @@
 import { generateQRCodeData } from '../../lib/api';
 import { getCachedBankList } from '../../lib/db';
 import QRCode from 'qrcode';
+import Redis from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URL);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { bankAccount, bankCode, amount } = req.body;
+    const { bankAccount, bankCode, amount, user } = req.body;
 
     try {
       // Lấy danh sách ngân hàng từ cache để tìm bankBin
@@ -25,6 +28,24 @@ export default async function handler(req, res) {
 
       // Chuyển đổi QR code text thành data URL của ảnh PNG
       const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
+
+      // Tạo key cho Redis (user:amount)
+      const redisKey = `${user}:${amount}`;
+
+      // Lưu dữ liệu vào Redis với thời hạn 1 ngày (86400 giây)
+      await redis.set(
+        redisKey,
+        JSON.stringify({
+          qrData: qrCodeBase64, // Dữ liệu base64 của mã QR
+          bankName: bank.shortName || bank.name,
+          bankLogo: bank.logo,
+          bankAccount,
+          userName: user, // Thông tin user (tùy chỉnh)
+          amount
+        }),
+        'EX',
+        86400
+      );
 
       res.status(200).json({ qr_code_data: qrCodeBase64 });
     } catch (error) {
