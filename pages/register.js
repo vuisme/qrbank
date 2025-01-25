@@ -26,6 +26,7 @@ function Register({ recaptchaToken }) {
   const [bankAccount, setBankAccount] = useState('');
   const [error, setError] = useState('');
   const [banks, setBanks] = useState([]);
+  const [selectedBank, setSelectedBank] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -100,8 +101,10 @@ function Register({ recaptchaToken }) {
   };
 
   const handleBankChange = (event) => {
-    const selectedBankCode = event.target.value;
-    setBankCode(selectedBankCode);
+    const bankCode = event.target.value;
+    setBankCode(bankCode);
+    const foundBank = banks.find((bank) => bank.code === bankCode);
+    setSelectedBank(foundBank);
   };
 
   const handleBankAccountBlur = async () => {
@@ -231,21 +234,31 @@ function Register({ recaptchaToken }) {
             Họ tên đầy đủ của cá nhân hoặc cửa hàng hiển thị ở trang mã QR.
           </FormHelperText>
           <FormControl fullWidth margin="normal">
-            <InputLabel id="bank-code-label">Ngân Hàng</InputLabel>
+            <InputLabel id="bank-label">Bank</InputLabel>
             <Select
-              labelId="bank-code-label"
-              id="bank-code"
-              value={bankCode}
-              label="Ngân hàng"
-              onChange={(e) => setBankCode(e.target.value)}
+              labelId="bank-label"
+              id="bank"
+              value={bank_code}
+              label="Bank"
+              onChange={handleBankChange}
             >
               {banks.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
-                  {bank.shortName} - {bank.name}
+                  {bank.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+          {selectedBank && (
+            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+              <Avatar
+                src={selectedBank.logo}
+                alt={selectedBank.name}
+                sx={{ width: 40, height: 40, mr: 2 }}
+              />
+              <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
+            </Box>
+          )}
           <TextField
             margin="normal"
             required
