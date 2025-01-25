@@ -84,7 +84,7 @@ export default function EditMember() {
     const dataToSubmit = {
       userid: id,
       bank_code: bankBin,
-      bank_account,
+      bank_account: bankAccount,
       usertype,
       password,
       name,
