@@ -14,6 +14,7 @@ import {
   FormHelperText,
 } from '@mui/material';
 import withReCAPTCHA from '../components/withReCAPTCHA';
+import { generateQRCodeData } from '../lib/api';
 
 function Register({ recaptchaToken }) {
   const [userid, setUserid] = useState('');
@@ -95,6 +96,36 @@ function Register({ recaptchaToken }) {
       setUserid(value.toLowerCase()); // Chuyển đổi sang chữ thường
     } else {
         setError('Mã thành viên chỉ bao gồm chữ và số, không có kí tự đặc biệt!');
+    }
+  };
+
+  const handleBankChange = (event) => {
+    const selectedBankCode = event.target.value;
+    setBankCode(selectedBankCode);
+  };
+
+  const handleBankAccountBlur = async () => {
+    if (bankCode && bankAccount) {
+        const bank = banks.find((b) => b.code === bankCode);
+        if (!bank) {
+            setError('Invalid bank code.');
+            return;
+        }
+        try {
+            const qrCodeData = await generateQRCodeData({
+                bankBin: bank.bin, // Sử dụng bin của ngân hàng đã chọn
+                bankNumber: bankAccount,
+                amount: '0', // Số tiền tạm thời là 0
+                purpose: 'Kiểm tra',
+            });
+
+            // Nếu không có lỗi xảy ra, mã QR hợp lệ
+            console.log("QR Code hợp lệ:", qrCodeData);
+            setError("");
+        } catch (error) {
+            console.error("Lỗi khi tạo mã QR:", error);
+            setError("Số tài khoản không hợp lệ cho ngân hàng đã chọn.");
+        }
     }
   };
 
@@ -220,10 +251,11 @@ function Register({ recaptchaToken }) {
             required
             fullWidth
             id="bank_account"
-            label="Số tài khoản"
+            label="Bank Account"
             name="bank_account"
             value={bankAccount}
             onChange={(e) => setBankAccount(e.target.value)}
+            onBlur={handleBankAccountBlur}
           />
           <FormHelperText>
             Nhập chính xác số tài khoản để tạo mã QR.
