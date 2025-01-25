@@ -4,15 +4,15 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const { user } = req.query;
 
-    if (!user) { // Kiểm tra xem user có được truyền vào không
+    if (!user) {
       return res.status(400).json({ error: 'User ID is required.' });
     }
 
     try {
       // Lấy thông tin người dùng từ database dựa vào userid
       const results = await query({
-        query: 'SELECT bank_code, bank_account FROM members WHERE userid = $1', // Thêm điều kiện WHERE
-        values: [user], // Truyền userid vào values
+        query: 'SELECT bank_code, bank_account, name FROM members WHERE userid = $1', // Thay đổi câu truy vấn
+        values: [user],
       });
 
       if (results.length > 0) {

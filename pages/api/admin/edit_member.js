@@ -2,16 +2,17 @@ import { query, hashPassword } from '../../../lib/db';
 
 export default async function handler(req, res) {
   if (req.method === 'PUT') {
-    const { userid, bank_code, bank_account, usertype, password } = req.body;
+    const { userid, bank_code, bank_account, usertype, password, name } = req.body; // Thêm name
 
     try {
-      let updateQuery = 'UPDATE members SET bank_code = $2, bank_account = $3, usertype = $4';
-      let values = [userid, bank_code, bank_account, usertype];
+      let updateQuery =
+        'UPDATE members SET bank_code = $2, bank_account = $3, usertype = $4, name = $5'; // Thêm name
+      let values = [userid, bank_code, bank_account, usertype, name]; // Thêm name
 
       // Kiểm tra xem có cập nhật mật khẩu không
       if (password) {
         const hashedPassword = await hashPassword(password);
-        updateQuery += ', password = $5 WHERE userid = $1';
+        updateQuery += ', password = $6 WHERE userid = $1';
         values.push(hashedPassword);
       } else {
         updateQuery += ' WHERE userid = $1';

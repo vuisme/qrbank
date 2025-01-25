@@ -17,10 +17,11 @@ import {
 
 export default function AddMember() {
   const [userid, setUserid] = useState('');
-  const [bank_code, setBankCode] = useState(''); // Giá trị bin sẽ được lưu vào đây
+  const [bank_code, setBankCode] = useState('');
   const [bank_account, setBankAccount] = useState('');
   const [usertype, setUsertype] = useState('free');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState(''); // Thêm state name
   const [error, setError] = useState('');
   const [banks, setBanks] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
@@ -48,7 +49,6 @@ export default function AddMember() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Lấy bin từ selectedBank
     const selectedBin = selectedBank ? selectedBank.bin : '';
 
     const response = await fetch('/api/admin/add_member', {
@@ -56,10 +56,11 @@ export default function AddMember() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userid,
-        bank_code: selectedBin, // Lưu bin vào bank_code
+        bank_code: selectedBin,
         bank_account,
         usertype,
         password,
+        name, // Thêm name
       }),
     });
 
@@ -71,6 +72,7 @@ export default function AddMember() {
       setBankAccount('');
       setUsertype('free');
       setPassword('');
+      setName(''); // Reset name
       setSelectedBank(null);
     } else {
       const errorData = await response.json();
@@ -103,8 +105,19 @@ export default function AddMember() {
             value={userid}
             onChange={(e) => setUserid(e.target.value)}
           />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="Name"
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />{' '}
+          {/* Thêm trường nhập name */}
           <FormControl fullWidth margin="normal">
-            <InputLabel id="bank-label">Ngân hàng</InputLabel>
+            <InputLabel id="bank-label">Bank</InputLabel>
             <Select
               labelId="bank-label"
               id="bank"
@@ -114,12 +127,11 @@ export default function AddMember() {
             >
               {banks.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
-                  {bank.shortName} - {bank.name}
+                  {bank.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-          {/* Hiển thị logo và tên ngân hàng */}
           {selectedBank && (
             <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
               <Avatar

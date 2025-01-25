@@ -5,7 +5,8 @@ export default async function handler(req, res) {
     try {
       // Lấy danh sách thành viên từ database
       const results = await query({
-        query: 'SELECT userid, bank_code, bank_account, usertype FROM members ORDER BY userid', // Sắp xếp theo userid
+        query:
+          'SELECT userid, bank_code, bank_account, usertype, name FROM members ORDER BY userid', // Thêm name
       });
 
       res.status(200).json(results);

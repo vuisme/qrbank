@@ -2,7 +2,7 @@ import { query, hashPassword } from '../../../lib/db';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { userid, bank_code, bank_account, usertype, password } = req.body;
+    const { userid, bank_code, bank_account, usertype, password, name } = req.body; // Thêm name
 
     try {
       // Hash mật khẩu trước khi lưu
@@ -10,8 +10,9 @@ export default async function handler(req, res) {
 
       // Thêm thành viên vào database
       await query({
-        query: 'INSERT INTO members (userid, bank_code, bank_account, usertype, password) VALUES ($1, $2, $3, $4, $5)',
-        values: [userid, bank_code, bank_account, usertype, hashedPassword],
+        query:
+          'INSERT INTO members (userid, bank_code, bank_account, usertype, password, name) VALUES ($1, $2, $3, $4, $5, $6)', // Thêm name
+        values: [userid, bank_code, bank_account, usertype, hashedPassword, name], // Thêm name
       });
       res.status(200).json({ message: 'Member added successfully.' });
     } catch (error) {

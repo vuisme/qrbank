@@ -43,6 +43,7 @@ export default function Members() {
           <TableHead>
             <TableRow>
               <TableCell>User ID</TableCell>
+              <TableCell>Name</TableCell> {/* Thêm cột name */}
               <TableCell>Bank Code</TableCell>
               <TableCell>Bank Account</TableCell>
               <TableCell>User Type</TableCell>
@@ -55,6 +56,7 @@ export default function Members() {
                 <TableCell component="th" scope="row">
                   {member.userid}
                 </TableCell>
+                <TableCell>{member.name}</TableCell> {/* Hiển thị name */}
                 <TableCell>{member.bank_code}</TableCell>
                 <TableCell>{member.bank_account}</TableCell>
                 <TableCell>{member.usertype}</TableCell>
@@ -63,7 +65,7 @@ export default function Members() {
                     variant="contained"
                     color="primary"
                     component={Link}
-                    href={`/admin/edit-member?id=${member.userid}`}
+                    href={`/admin/edit_member?id=${member.userid}`}
                   >
                     Edit
                   </Button>

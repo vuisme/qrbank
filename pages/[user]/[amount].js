@@ -18,6 +18,7 @@ export default function GenerateQR() {
   const [bankCode, setBankCode] = useState('');
   const [bankAccount, setBankAccount] = useState('');
   const [bankName, setBankName] = useState('');
+  const [userName, setUserName] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [bankLogo, setBankLogo] = useState(null);
@@ -52,6 +53,7 @@ export default function GenerateQR() {
       if (res.ok && data) {
         setBankCode(data.bank_code);
         setBankAccount(data.bank_account);
+        setUserName(data.name); // Sửa ở đây, set name cho userName
 
         const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
         if (bankInfoRes.ok) {
@@ -86,12 +88,12 @@ export default function GenerateQR() {
           body: JSON.stringify({
             bankAccount,
             bankCode,
-            amount: numericAmount, // Gửi số tiền đã chuyển đổi
+            amount: numericAmount,
           }),
         });
 
         if (res.ok) {
-          const { qrImage } = await res.json();
+          const { qrImage } = await res.json(); // Sửa ở đây, qrImage thành qr_code_data
           setQrData(qrImage);
         } else {
           const errorData = await res.json();
@@ -154,7 +156,7 @@ export default function GenerateQR() {
                 Tên chủ TK:
               </Typography>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {user ? user.toUpperCase() : ''}
+                {userName ? userName.toUpperCase() : ''} {/* Sửa ở đây, thay user thành userName */}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
