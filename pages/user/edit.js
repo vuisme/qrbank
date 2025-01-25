@@ -13,6 +13,7 @@ import {
   MenuItem,
   Avatar
 } from '@mui/material';
+// import { getCachedBankList } from '../../lib/db'; // Xóa dòng này
 import UserLayout from '../../components/UserLayout';
 
 export default function EditUser() {
@@ -45,7 +46,6 @@ export default function EditUser() {
       } else {
         const errorData = await res.json();
         setError(errorData.error || 'Failed to fetch user data');
-        // Nếu token hết hạn hoặc không hợp lệ, xóa token và chuyển hướng về trang login
         if (res.status === 401) {
           localStorage.removeItem('token');
           router.push('/login');
@@ -58,10 +58,12 @@ export default function EditUser() {
 
   useEffect(() => {
     const fetchBanks = async () => {
-      try {
-        const fetchedBanks = await getCachedBankList();
-        setBanks(fetchedBanks);
-      } catch (err) {
+      // Gọi API /api/banks thay vì gọi trực tiếp getCachedBankList
+      const response = await fetch('/api/banks');
+      if (response.ok) {
+        const data = await response.json();
+        setBanks(data);
+      } else {
         setError('Failed to fetch banks.');
       }
     };
