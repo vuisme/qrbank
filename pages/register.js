@@ -22,6 +22,7 @@ function Register({ recaptchaToken }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [bank_code, setBankCode] = useState('');
   const [bankCode, setBankCode] = useState('');
   const [bankAccount, setBankAccount] = useState('');
   const [error, setError] = useState('');
