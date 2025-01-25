@@ -59,7 +59,7 @@ function Register({ recaptchaToken }) {
       );
       return;
     }
-
+    const selectedBin = selectedBank ? selectedBank.bin : '';
     // Kiểm tra tất cả các trường bắt buộc đã được điền
     if (!userid || !password || !email || !name || !bankCode || !bankAccount) {
         setError('Please fill in all required fields.');
@@ -74,7 +74,7 @@ function Register({ recaptchaToken }) {
         password,
         email,
         name,
-        bank_code: bankCode,
+        bank_code: selectedBin,
         bank_account: bankAccount,
         recaptcha: recaptchaToken
       }),
