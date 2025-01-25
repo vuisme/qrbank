@@ -82,32 +82,22 @@ export default function GenerateQR() {
         // Chuyển đổi amount string thành số
         const numericAmount = parseAmount(amount);
 
-        try {
-          // Lấy danh sách ngân hàng từ cache để tìm bankBin
-          const banks = await getCachedBankList();
-          const bank = banks.find((b) => b.bin === bankCode);
-
-          if (!bank) {
-            setError('Invalid bank code.');
-            setIsLoading(false);
-            return;
-          }
-
-          // Tạo mã QR data (text)
-          const qrCodeData = await generateQRCodeData({
-            bankBin: bank.bin,
-            bankNumber: bankAccount,
+        const res = await fetch('/api/qr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bankAccount,
+            bankCode,
             amount: numericAmount,
-            purpose: 'Thanh toan QR', // Bạn có thể thay đổi nội dung này
-          });
+          }),
+        });
 
-          // Chuyển đổi mã QR thành base64 (nếu cần hiển thị dưới dạng ảnh)
-          const base64Data = Buffer.from(qrCodeData).toString('base64');
-
-          setQrData(base64Data); // Cập nhật state qrData với base64 data
-        } catch (error) {
-          console.error(error);
-          setError(error.message || 'Failed to generate QR code.');
+        if (res.ok) {
+          const { qrImage } = await res.json(); // Sửa ở đây, qrImage thành qr_code_data
+          setQrData(qrImage);
+        } else {
+          const errorData = await res.json();
+          setError(errorData.error || 'Failed to generate QR code.');
         }
       }
       setIsLoading(false);
