@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   FormHelperText,
+  Avatar,
 } from '@mui/material';
 import withReCAPTCHA from '../components/withReCAPTCHA';
 import { generateQRCodeData } from '../lib/api';
