@@ -14,6 +14,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const { redirect } = router.query;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -27,8 +28,9 @@ export default function Login() {
 
     if (response.ok) {
       const data = await response.json();
-      localStorage.setItem('token', data.token); // Lưu token vào localStorage
-      router.push('/'); // Chuyển hướng đến trang chủ
+      localStorage.setItem('token', data.token);
+      // Chuyển hướng đến trang /manage hoặc trang redirect
+      router.push(redirect || '/manage');
     } else {
       const data = await response.json();
       setError(data.error || 'Login failed.');
