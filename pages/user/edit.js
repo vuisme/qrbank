@@ -33,8 +33,9 @@ export default function EditUser() {
         return;
       }
 
-      const res = await fetch('/api/getUserData', {
-        headers: {  },
+      // Sửa thành /api/user/info và gửi kèm token
+      const res = await fetch('/api/user/info', {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (res.ok) {
@@ -45,13 +46,14 @@ export default function EditUser() {
       } else {
         const errorData = await res.json();
         setError(errorData.error || 'Failed to fetch user data');
+        // Nếu token hết hạn hoặc không hợp lệ, xóa token và chuyển hướng về trang login
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          router.push('/login');
+        }
       }
     };
 
-    fetchUserData();
-  }, [router]);
-
-  useEffect(() => {
     const fetchBanks = async () => {
       try {
         const fetchedBanks = await getCachedBankList();
@@ -60,9 +62,10 @@ export default function EditUser() {
         setError('Failed to fetch banks.');
       }
     };
-  
+
+    fetchUserData();
     fetchBanks();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (banks.length > 0 && bank_code) {
