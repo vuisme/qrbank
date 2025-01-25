@@ -85,17 +85,23 @@ export default function GenerateQR() {
         const numericAmount = parseAmount(amount);
 
         try {
-          // Tạo mã QR data (text) trực tiếp, không cần tìm bankBin
-          const qrCodeData = await generateQRCodeData({
-            bankBin: bankCode, // Sử dụng bankCode trực tiếp (đã là bin)
-            bankNumber: bankAccount,
-            amount: numericAmount,
-            purpose: 'Thanh toan QR',
+          const res = await fetch('/api/qr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bankAccount,
+              bankCode,
+              amount: numericAmount,
+            }),
           });
-          console.log(qrCodeData)
-          // Chuyển đổi mã QR thành base64
-          const base64Data = btoa(qrCodeData);
-          setQrData(base64Data);
+
+          if (res.ok) {
+            const { qr_code_data } = await res.json();
+            setQrData(qr_code_data); // Nhận trực tiếp base64 data
+          } else {
+            const errorData = await res.json();
+            setError(errorData.error || 'Failed to generate QR code.');
+          }
         } catch (error) {
           console.error(error);
           setError(error.message || 'Failed to generate QR code.');

@@ -19,11 +19,11 @@ export default async function handler(req, res) {
       const qrCodeData = await generateQRCodeData({
         bankBin: bank.bin,
         bankNumber: bankAccount,
-        amount,
-        purpose: 'QuetQR',
+        amount: amount,
+        purpose: 'Thanh toan QR',
       });
 
-      // Chuyển đổi QR code text thành base64 image
+      // Chuyển đổi QR code text thành data URL của ảnh PNG
       const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
 
       res.status(200).json({ qr_code_data: qrCodeBase64 });
