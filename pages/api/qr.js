@@ -1,5 +1,6 @@
 import { generateQRCodeData } from '../../lib/api';
 import { getCachedBankList } from '../../lib/db';
+import QRCode from 'qrcode';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -14,18 +15,18 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid bank code.' });
       }
 
-      // Tạo mã QR
+      // Tạo mã QR data (text)
       const qrCodeData = await generateQRCodeData({
         bankBin: bank.bin,
         bankNumber: bankAccount,
-        amount: amount,
-        purpose: 'Done', // Bạn có thể thay đổi nội dung này
+        amount,
+        purpose: 'QuetQR',
       });
 
-      // Chuyển đổi mã QR thành base64 (nếu cần hiển thị dưới dạng ảnh)
-      const base64Data = Buffer.from(qrCodeData).toString('base64');
+      // Chuyển đổi QR code text thành base64 image
+      const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
 
-      res.status(200).json({ qr_code_data: base64Data });
+      res.status(200).json({ qr_code_data: qrCodeBase64 });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Failed to generate QR code.' });
