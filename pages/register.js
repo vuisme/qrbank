@@ -12,7 +12,6 @@ import {
   Select,
   MenuItem,
   FormHelperText,
-  Link,
 } from '@mui/material';
 
 export default function Register() {
@@ -87,6 +86,16 @@ export default function Register() {
     }
   };
 
+  const handleUseridChange = (e) => {
+    const value = e.target.value;
+    // Kiểm tra định dạng userid (chỉ chữ và số)
+    if (/^[a-zA-Z0-9]*$/.test(value)) {
+      setUserid(value.toLowerCase()); // Chuyển đổi sang chữ thường
+    } else {
+        setError('User ID must contain only letters and numbers.');
+    }
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -111,7 +120,8 @@ export default function Register() {
             name="userid"
             autoFocus
             value={userid}
-            onChange={(e) => setUserid(e.target.value)}
+            onChange={handleUseridChange}
+            error={!!error} // Thêm error vào TextField
           />
           <FormHelperText>
             <Typography variant="body2" color="textSecondary" component="span">
