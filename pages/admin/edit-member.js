@@ -80,8 +80,7 @@ export default function EditMember() {
     }
 
     const bankBin = selectedBank ? selectedBank.bin : '';
-    console.log(selectedBank)
-    console.log(bankBin)
+
     const response = await fetch('/api/admin/edit_member', {
       method: 'PUT',
       headers: {
@@ -109,10 +108,8 @@ export default function EditMember() {
 
   const handleBankChange = (event) => {
     const newBankCode = event.target.value;
-    console.log("handleBankChange - newBankCode:", newBankCode); // Log giá trị bankCode
     setBankCode(newBankCode);
     const foundBank = banks.find((bank) => bank.code === newBankCode);
-    console.log("handleBankChange - foundBank:", foundBank); // Log giá trị foundBank
     setSelectedBank(foundBank);
   };
 
