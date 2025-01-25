@@ -1,6 +1,7 @@
 import { query } from '../../../lib/db';
+import isAdmin from '../../../middleware/isAdmin';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method === 'POST') {
     const { apiKey, apiServer } = req.body;
 
@@ -29,3 +30,5 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+export default isAdmin(handler);
