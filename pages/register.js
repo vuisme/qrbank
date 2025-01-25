@@ -76,7 +76,7 @@ function Register({ recaptchaToken }) {
         password,
         email,
         name,
-        bankCode: selectedBin,
+        bank_code: selectedBin,
         bank_account: bankAccount,
         recaptcha: recaptchaToken
       }),
