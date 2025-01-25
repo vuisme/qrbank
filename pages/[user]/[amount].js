@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import QRResult from '../../components/QRResult';
-import { generateQRCodeData } from '../../lib/api';
 import {
   Container,
   Typography,
@@ -11,8 +10,13 @@ import {
   Divider,
   Paper,
 } from '@mui/material';
+import { generateQRCodeData } from '../../lib/api';
+import withReCAPTCHA from '../../components/withReCAPTCHA';
+import Redis from 'ioredis';
 
-export default function GenerateQR() {
+const redis = new Redis(process.env.REDIS_URL);
+
+function GenerateQR({ recaptchaToken }) {
   const router = useRouter();
   const { user, amount } = router.query;
   const [qrData, setQrData] = useState(null);
@@ -21,8 +25,9 @@ export default function GenerateQR() {
   const [bankName, setBankName] = useState('');
   const [userName, setUserName] = useState('');
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [bankLogo, setBankLogo] = useState(null);
+  const [isVerified, setIsVerified] = useState(false);
 
   // Hàm chuyển đổi chuỗi amount thành số
   const parseAmount = (amountStr) => {
@@ -31,7 +36,6 @@ export default function GenerateQR() {
     const multiplier = {
       k: 1000,
       m: 1000000,
-      // Có thể thêm các đơn vị khác (ví dụ: b cho billion)
     };
 
     const lowerCaseAmount = amountStr.toLowerCase();
@@ -46,45 +50,78 @@ export default function GenerateQR() {
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    if (recaptchaToken) {
+      setIsVerified(true);
+    }
+  }, [recaptchaToken]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isVerified) return;
+
       setIsLoading(true);
       setError(null);
-      const res = await fetch(`/api/getUserData`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: user }),
-      });
-      const data = await res.json();
-      if (res.ok && data) {
-        setBankCode(data.bank_code);
-        setBankAccount(data.bank_account);
-        setUserName(data.name);
 
-        // Lấy thông tin ngân hàng từ bankCode đã có (sử dụng bin)
-        const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
-        if (bankInfoRes.ok) {
-          const bankInfo = await bankInfoRes.json();
-          setBankName(bankInfo.shortName || bankInfo.name);
-          setBankLogo(bankInfo.logo);
-        } else {
-          setError('Failed to fetch bank info.');
+      // Tạo key cho Redis
+      const redisKey = `${user}:${amount}`;
+
+      try {
+        // Thử lấy dữ liệu từ Redis
+        const cachedData = await redis.get(redisKey);
+        if (cachedData) {
+          const data = JSON.parse(cachedData);
+          setQrData(data.qrCodeBase64);
+          setBankName(data.bankName);
+          setBankLogo(data.bankLogo);
+          setBankAccount(data.bankAccount);
+          setUserName(data.userName); // Set thông tin user
+          setIsLoading(false);
+          return; // Kết thúc nếu lấy được từ cache
         }
-      } else {
-        setError(data?.error || 'User not found.');
+
+        // Nếu không có trong cache, fetch từ API
+        const res = await fetch(`/api/getUserData`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: user }),
+        });
+        const data = await res.json();
+        if (res.ok && data) {
+          setBankCode(data.bank_code);
+          setBankAccount(data.bank_account);
+          setUserName(data.name);
+
+          const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
+          if (bankInfoRes.ok) {
+            const bankInfo = await bankInfoRes.json();
+            setBankName(bankInfo.shortName || bankInfo.name);
+            setBankLogo(bankInfo.logo);
+          } else {
+            setError('Failed to fetch bank info.');
+          }
+        } else {
+          setError(data?.error || 'User not found.');
+        }
+      } catch (error) {
+        console.error(error);
+        setError('Failed to load data.');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
-    if (user) {
-      fetchUserData();
+    if (user && amount && isVerified) {
+      fetchData();
     }
-  }, [user]);
+  }, [user, amount, isVerified]);
 
   useEffect(() => {
     const generateQR = async () => {
+      if (!isVerified) return; // Dừng lại nếu chưa verified
+
       setIsLoading(true);
       setError(null);
-      if (bankAccount && bankCode && amount) {
+      if (bankAccount && bankCode && amount && recaptchaToken) {
         // Chuyển đổi amount string thành số
         const numericAmount = parseAmount(amount);
 
@@ -96,12 +133,15 @@ export default function GenerateQR() {
               bankAccount,
               bankCode,
               amount: numericAmount,
+              recaptcha: recaptchaToken,
+              user: user,
+              amount: amount
             }),
           });
 
           if (res.ok) {
             const { qr_code_data } = await res.json();
-            setQrData(qr_code_data); // Nhận trực tiếp base64 data
+            setQrData(qr_code_data);
           } else {
             const errorData = await res.json();
             setError(errorData.error || 'Failed to generate QR code.');
@@ -114,10 +154,10 @@ export default function GenerateQR() {
       setIsLoading(false);
     };
 
-    if (bankAccount && bankCode && amount) {
+    if (bankAccount && bankCode && amount && isVerified) {
       generateQR();
     }
-  }, [bankAccount, bankCode, amount]);
+  }, [bankAccount, bankCode, amount, isVerified, recaptchaToken]);
 
   return (
     <Container component="main" maxWidth="xs">
@@ -212,3 +252,5 @@ export default function GenerateQR() {
     </Container>
   );
 }
+
+export default withReCAPTCHA(GenerateQR, 'generate_qr');
