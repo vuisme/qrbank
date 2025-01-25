@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import {
   TextField,
@@ -15,17 +15,25 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  useEffect(() => {
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
+    if (tokenAdmin) {
+      router.push('/admin');
+    }
+  }, [router]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const response = await fetch('/api/admin/login', {
+    const response = await fetch('/api/admin/login', { // Sửa lại api route
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
 
     if (response.ok) {
-      localStorage.setItem('isAdminLoggedIn', 'true');
+      const data = await response.json();
+      localStorage.setItem('tokenAdmin', data.token);
       router.push('/admin');
     } else {
       const data = await response.json();
