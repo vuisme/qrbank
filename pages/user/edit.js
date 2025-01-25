@@ -7,7 +7,13 @@ import {
   Typography,
   Box,
   Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Avatar
 } from '@mui/material';
+import { getCachedBankList } from '../../lib/db';
 
 export default function EditUser() {
   const [bank_code, setBankCode] = useState('');
@@ -15,6 +21,8 @@ export default function EditUser() {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [banks, setBanks] = useState([]);
+  const [selectedBank, setSelectedBank] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,7 +34,7 @@ export default function EditUser() {
       }
 
       const res = await fetch('/api/getUserData', {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {  },
       });
 
       if (res.ok) {
@@ -43,6 +51,33 @@ export default function EditUser() {
     fetchUserData();
   }, [router]);
 
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const fetchedBanks = await getCachedBankList();
+        setBanks(fetchedBanks);
+      } catch (err) {
+        setError('Failed to fetch banks.');
+      }
+    };
+  
+    fetchBanks();
+  }, []);
+
+  useEffect(() => {
+    if (banks.length > 0 && bank_code) {
+      const foundBank = banks.find((bank) => bank.bin === bank_code);
+      setSelectedBank(foundBank);
+    }
+  }, [banks, bank_code]);
+
+  const handleBankChange = (event) => {
+    const newBankCode = event.target.value;
+    setBankCode(newBankCode);
+    const foundBank = banks.find((bank) => bank.code === newBankCode);
+    setSelectedBank(foundBank);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
@@ -53,17 +88,20 @@ export default function EditUser() {
       return;
     }
 
+    const selectedBin = selectedBank ? selectedBank.bin : '';
+
     const response = await fetch('/api/user/edit', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ bank_code, bank_account, name, password }),
+      body: JSON.stringify({ bank_code: selectedBin, bank_account, name, password }),
     });
 
     if (response.ok) {
       alert('User information updated successfully!');
+      router.push('/manage');
     } else {
       const data = await response.json();
       setError(data.error || 'Failed to update user information');
@@ -85,16 +123,33 @@ export default function EditUser() {
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="bank_code"
-            label="Bank Code"
-            name="bank_code"
-            value={bank_code}
-            onChange={(e) => setBankCode(e.target.value)}
-          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="bank-label">Bank</InputLabel>
+            <Select
+              labelId="bank-label"
+              id="bank"
+              value={bank_code}
+              label="Bank"
+              onChange={handleBankChange}
+            >
+              {banks.map((bank) => (
+                <MenuItem key={bank.id} value={bank.code}>
+                  {bank.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* Hiển thị logo và tên ngân hàng */}
+          {selectedBank && (
+            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+              <Avatar
+                src={selectedBank.logo}
+                alt={selectedBank.name}
+                sx={{ width: 40, height: 40, mr: 2 }}
+              />
+              <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
+            </Box>
+          )}
           <TextField
             margin="normal"
             required

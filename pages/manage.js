@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Container, Typography, Box, Alert } from '@mui/material';
-import UserLayout from '../components/UserLayout'; // Import UserLayout
+import { Container, Typography, Box, Alert, Button } from '@mui/material';
+import UserLayout from '../components/UserLayout';
+import Link from 'next/link';
 
 export default function Manage() {
   const [user, setUser] = useState(null);
@@ -12,12 +13,12 @@ export default function Manage() {
     const token = localStorage.getItem('token');
     if (!token) {
       // Chưa đăng nhập, chuyển hướng đến trang login
-      router.push('/login?redirect=/manage'); // Truyền query parameter redirect
+      router.push('/login?redirect=/manage');
       return;
     }
 
     const fetchUserData = async () => {
-      const res = await fetch('/api/getUserData', {
+      const res = await fetch('/api/user/info', { // Sửa thành /api/user/info
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -50,9 +51,25 @@ export default function Manage() {
               Tên: {user.name}
             </Typography>
             <Typography variant="body1">
+              User ID: {user.userid}
+            </Typography>
+            <Typography variant="body1">
+              Email: {user.email}
+            </Typography>
+            <Typography variant="body1">
               Số tài khoản: {user.bank_account}
             </Typography>
+            <Typography variant="body1">
+              Loại tài khoản: {user.usertype}
+            </Typography>
             {/* Hiển thị các thông tin khác của user */}
+            <Box sx={{ mt: 2 }}>
+                <Link href="/user/edit" passHref>
+                    <Button variant="contained" color="primary">
+                        Chỉnh sửa thông tin
+                    </Button>
+                </Link>
+            </Box>
           </Box>
         )}
       </Container>
