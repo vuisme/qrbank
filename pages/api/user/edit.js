@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
   if (req.method === 'PUT') {
-    // Lấy token từ header
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -12,15 +11,34 @@ export default async function handler(req, res) {
     }
 
     try {
-      // Xác thực token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const { userId } = decoded;
 
       const { bank_code, bank_account, name, password } = req.body;
 
-      let updateQuery =
-        'UPDATE members SET bank_code = $2, bank_account = $3, name = $4';
-      let values = [userId, bank_code, bank_account, name];
+      // Lấy thông tin hiện tại của user từ database
+      const currentUser = await query({
+        query: 'SELECT bank_code, bank_account FROM members WHERE userid = $1',
+        values: [userId],
+      });
+
+      if (currentUser.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      let updateQuery = 'UPDATE members SET name = $2';
+      let values = [userId, name];
+
+      // Chỉ cập nhật bank_code và bank_account nếu user chưa có thông tin này
+      if (!currentUser[0].bank_code) {
+          updateQuery += ', bank_code = $3';
+          values.push(bank_code);
+      }
+      
+      if (!currentUser[0].bank_account) {
+          updateQuery += ', bank_account = $4';
+          values.push(bank_account);
+      }
 
       if (password) {
         const hashedPassword = await hashPassword(password);

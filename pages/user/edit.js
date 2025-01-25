@@ -11,16 +11,15 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Avatar
+  Avatar,
 } from '@mui/material';
-// import { getCachedBankList } from '../../lib/db'; // Xóa dòng này
-import UserLayout from '../../components/UserLayout';
 
 export default function EditUser() {
-  const [bank_code, setBankCode] = useState('');
-  const [bank_account, setBankAccount] = useState('');
+  const [bankCode, setBankCode] = useState(''); // Sử dụng bankCode thay thế
+  const [bankAccount, setBankAccount] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); // Thêm state confirmPassword
   const [error, setError] = useState('');
   const [banks, setBanks] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
@@ -43,6 +42,19 @@ export default function EditUser() {
         setBankCode(data.bank_code);
         setBankAccount(data.bank_account);
         setName(data.name);
+
+        // Fetch bank information after fetching user data
+        if (data.bank_code) {
+          const banksResponse = await fetch('/api/banks');
+          if (banksResponse.ok) {
+            const banksData = await banksResponse.json();
+            setBanks(banksData);
+            const foundBank = banksData.find(bank => bank.bin === data.bank_code);
+            setSelectedBank(foundBank);
+          } else {
+            setError('Failed to fetch banks.');
+          }
+        }
       } else {
         const errorData = await res.json();
         setError(errorData.error || 'Failed to fetch user data');
@@ -58,7 +70,6 @@ export default function EditUser() {
 
   useEffect(() => {
     const fetchBanks = async () => {
-      // Gọi API /api/banks thay vì gọi trực tiếp getCachedBankList
       const response = await fetch('/api/banks');
       if (response.ok) {
         const data = await response.json();
@@ -72,11 +83,11 @@ export default function EditUser() {
   }, []);
 
   useEffect(() => {
-    if (banks.length > 0 && bank_code) {
-      const foundBank = banks.find((bank) => bank.bin === bank_code);
+    if (banks.length > 0 && bankCode) {
+      const foundBank = banks.find((bank) => bank.bin === bankCode);
       setSelectedBank(foundBank);
     }
-  }, [banks, bank_code]);
+  }, [banks, bankCode]);
 
   const handleBankChange = (event) => {
     const newBankCode = event.target.value;
@@ -89,12 +100,26 @@ export default function EditUser() {
     event.preventDefault();
     setError('');
 
+    // Kiểm tra mật khẩu
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    // Regex mật khẩu (ít nhất 8 ký tự, có chữ và số)
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (password && !passwordRegex.test(password)) {
+      setError('Password must be at least 8 characters and include both letters and numbers.');
+      return;
+    }
+
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/login');
       return;
     }
 
+    // Chỉ lấy bin nếu selectedBank tồn tại
     const selectedBin = selectedBank ? selectedBank.bin : '';
 
     const response = await fetch('/api/user/edit', {
@@ -103,7 +128,12 @@ export default function EditUser() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ bank_code: selectedBin, bank_account, name, password }),
+      body: JSON.stringify({
+        bank_code: selectedBin, // Gửi bin
+        bank_account: bankAccount, // Chỉ gửi bank_account khi được phép chỉnh sửa
+        name,
+        password,
+      }),
     });
 
     if (response.ok) {
@@ -136,9 +166,10 @@ export default function EditUser() {
               <Select
                 labelId="bank-label"
                 id="bank"
-                value={bank_code}
+                value={bankCode}
                 label="Bank"
                 onChange={handleBankChange}
+                disabled={!!bankCode} // Disable nếu đã có bankCode
               >
                 {banks.map((bank) => (
                   <MenuItem key={bank.id} value={bank.code}>
@@ -158,6 +189,14 @@ export default function EditUser() {
                 <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
               </Box>
             )}
+
+            {/* Thông báo nếu đã có bank_code và bank_account */}
+            {bankCode && bankAccount && (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                Liên hệ với admin để thay đổi thông tin ngân hàng vì lý do bảo mật.
+              </Alert>
+            )}
+
             <TextField
               margin="normal"
               required
@@ -165,8 +204,9 @@ export default function EditUser() {
               id="bank_account"
               label="Bank Account"
               name="bank_account"
-              value={bank_account}
+              value={bankAccount}
               onChange={(e) => setBankAccount(e.target.value)}
+              disabled={!!bankCode} // Disable nếu đã có bankCode
             />
             <TextField
               margin="normal"
@@ -182,11 +222,21 @@ export default function EditUser() {
               margin="normal"
               fullWidth
               name="password"
-              label="New Password (leave blank to keep unchanged)"
+              label="New Password"
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              name="confirmPassword"
+              label="Confirm New Password"
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
               Update Information
