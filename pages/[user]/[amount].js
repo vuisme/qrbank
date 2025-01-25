@@ -94,7 +94,7 @@ export default function GenerateQR() {
           });
           console.log(qrCodeData)
           // Chuyển đổi mã QR thành base64
-          const base64Data = Buffer.from(qrCodeData).toString('base64');
+          const base64Data = `data:image/png;base64,${btoa(qrCodeData)}`;
           setQrData(base64Data);
         } catch (error) {
           console.error(error);
