@@ -1,23 +1,12 @@
 import { generateQRCodeData } from '../../lib/api';
 import { getCachedBankList } from '../../lib/db';
 import QRCode from 'qrcode';
-import { verifyRecaptcha } from '../../lib/api';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { bankAccount, bankCode, amount, recaptcha } = req.body;
-    if (!recaptcha) {
-        return res.status(400).json({ error: 'reCAPTCHA token is required.' });
-    }
-      
+    const { bankAccount, bankCode, amount } = req.body;
+
     try {
-      // Verify reCAPTCHA token
-      const isRecaptchaValid = await verifyRecaptcha(recaptcha);
-
-      if (!isRecaptchaValid) {
-        return res.status(400).json({ error: 'reCAPTCHA verification failed.' });
-      }
-
       // Lấy danh sách ngân hàng từ cache để tìm bankBin
       const banks = await getCachedBankList();
       const bank = banks.find((b) => b.bin === bankCode);
