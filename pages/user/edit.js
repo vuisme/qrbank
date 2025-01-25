@@ -13,6 +13,7 @@ import {
   MenuItem,
   Avatar,
 } from '@mui/material';
+import UserLayout from '../../components/UserLayout';
 
 export default function EditUser() {
   const [bankCode, setBankCode] = useState(''); // Sử dụng bankCode thay thế
