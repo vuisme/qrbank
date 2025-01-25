@@ -92,7 +92,7 @@ export default function GenerateQR() {
             amount: numericAmount,
             purpose: 'Thanh toan QR',
           });
-
+          console.log(qrCodeData)
           // Chuyển đổi mã QR thành base64
           const base64Data = Buffer.from(qrCodeData).toString('base64');
           setQrData(base64Data);
