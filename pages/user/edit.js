@@ -13,7 +13,7 @@ import {
   MenuItem,
   Avatar
 } from '@mui/material';
-import { getCachedBankList } from '../../lib/db';
+// import { getCachedBankList } from '../../lib/db'; // không dùng lib/db trong user/edit.js
 
 export default function EditUser() {
   const [bank_code, setBankCode] = useState('');
@@ -33,7 +33,6 @@ export default function EditUser() {
         return;
       }
 
-      // Sửa thành /api/user/info và gửi kèm token
       const res = await fetch('/api/user/info', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -54,18 +53,22 @@ export default function EditUser() {
       }
     };
 
-    const fetchBanks = async () => {
-      try {
-        const fetchedBanks = await getCachedBankList();
-        setBanks(fetchedBanks);
-      } catch (err) {
-        setError('Failed to fetch banks.');
-      }
-    };
-
     fetchUserData();
-    fetchBanks();
   }, [router]);
+
+  useEffect(() => {
+    const fetchBanks = async () => {
+        const response = await fetch('/api/banks');
+        if (response.ok) {
+          const data = await response.json();
+          setBanks(data);
+        } else {
+          setError('Failed to fetch banks.');
+        }
+      };
+
+    fetchBanks();
+  }, []);
 
   useEffect(() => {
     if (banks.length > 0 && bank_code) {
