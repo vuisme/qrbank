@@ -16,11 +16,11 @@ import {
 } from '@mui/material';
 
 export default function EditMember() {
-  const [bank_code, setBankCode] = useState('');
-  const [bank_account, setBankAccount] = useState('');
+  const [bankCode, setBankCode] = useState(''); // Đổi tên state để tránh nhầm lẫn
+  const [bankAccount, setBankAccount] = useState('');
   const [usertype, setUsertype] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState(''); // Thêm state name
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [banks, setBanks] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
@@ -31,66 +31,73 @@ export default function EditMember() {
     const tokenAdmin = localStorage.getItem('tokenAdmin');
     if (!tokenAdmin) {
       router.push('/admin/login');
+      return; // Thêm return để dừng useEffect
     }
 
-    const fetchMember = async () => {
-      if (id) {
-        const response = await fetch(`/api/admin/get_member?userid=${id}`, {
-          headers: {
-            Authorization: `Bearer ${tokenAdmin}`, // Gửi token trong header
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setBankCode(data.bank_code);
-          setBankAccount(data.bank_account);
-          setUsertype(data.usertype);
-          setName(data.name); // Set name
-          // Không set password vào state
-        } else {
-          const errorData = await response.json();
-          setError(errorData.error || 'Failed to fetch member');
+    // Gộp 2 useEffect thành 1
+    const fetchData = async () => {
+        try {
+            const banksResponse = await fetch('/api/banks');
+            if (!banksResponse.ok) throw new Error('Failed to fetch banks.');
+            const banksData = await banksResponse.json();
+            setBanks(banksData);
+
+            if (id) {
+                const memberResponse = await fetch(`/api/admin/get_member?userid=${id}`, {
+                headers: { Authorization: `Bearer ${tokenAdmin}` },
+                });
+                if (!memberResponse.ok) throw new Error('Failed to fetch member data.');
+                
+                const data = await memberResponse.json();
+                // Cập nhật selectedBank ngay khi có thông tin member và banks
+                const foundBank = banksData.find((bank) => bank.bin === data.bank_code);
+                if (foundBank) {
+                    setSelectedBank(foundBank);
+                    setBankCode(foundBank.code); // Cập nhật bankCode từ selectedBank
+                } else {
+                    // Xử lý trường hợp không tìm thấy ngân hàng
+                    console.error("Bank not found for the given bank_code");
+                }
+
+                setBankAccount(data.bank_account);
+                setUsertype(data.usertype);
+                setName(data.name);
+            }
+        } catch (error) {
+            console.error(error);
+            setError(error.message);
         }
-      }
     };
 
-    const fetchBanks = async () => {
-      const response = await fetch('/api/banks');
-      if (response.ok) {
-        const data = await response.json();
-        setBanks(data);
-      } else {
-        setError('Failed to fetch banks.');
-      }
-    };
-
-    fetchMember();
-    fetchBanks();
+    fetchData();
   }, [id, router]);
-
-  useEffect(() => {
-    // Khi banks đã được fetch và bank_code đã được set từ fetchMember
-    if (banks.length > 0 && bank_code) {
-      const foundBank = banks.find((bank) => bank.bin === bank_code);
-      setSelectedBank(foundBank);
-    }
-  }, [banks, bank_code]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setError('');
 
-    const selectedBin = selectedBank ? selectedBank.bin : '';
     const tokenAdmin = localStorage.getItem('tokenAdmin');
+    if (!tokenAdmin) {
+      router.push('/admin/login');
+      return;
+    }
+
+    // Kiểm tra selectedBank trước khi lấy bin
+    const selectedBin = selectedBank ? selectedBank.bin : ''; 
+
     const response = await fetch('/api/admin/edit_member', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenAdmin}` },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${tokenAdmin}`,
+      },
       body: JSON.stringify({
         userid: id,
         bank_code: selectedBin,
         bank_account,
         usertype,
         password,
-        name, // Thêm name
+        name,
       }),
     });
 
@@ -104,8 +111,10 @@ export default function EditMember() {
   };
 
   const handleBankChange = (event) => {
-    const bankCode = event.target.value;
-    setBankCode(bankCode);
+    const bankCode = event.target.value; // Lấy bankCode từ event
+    setBankCode(bankCode); // Cập nhật state bankCode
+
+    // Tìm selectedBank dựa trên bankCode
     const foundBank = banks.find((bank) => bank.code === bankCode);
     setSelectedBank(foundBank);
   };
@@ -118,22 +127,12 @@ export default function EditMember() {
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Name"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
           <FormControl fullWidth margin="normal">
             <InputLabel id="bank-label">Bank</InputLabel>
             <Select
               labelId="bank-label"
               id="bank"
-              value={bank_code}
+              value={bankCode} // Sử dụng bankCode
               label="Bank"
               onChange={handleBankChange}
             >
@@ -178,6 +177,16 @@ export default function EditMember() {
               <MenuItem value="paid">Paid</MenuItem>
             </Select>
           </FormControl>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="Name"
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
           <TextField
             margin="normal"
             fullWidth
