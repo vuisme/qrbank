@@ -13,7 +13,8 @@ import {
   MenuItem,
   Avatar
 } from '@mui/material';
-// import { getCachedBankList } from '../../lib/db'; // không dùng lib/db trong user/edit.js
+import { getCachedBankList } from '../../lib/db';
+import UserLayout from '../../components/UserLayout';
 
 export default function EditUser() {
   const [bank_code, setBankCode] = useState('');
@@ -58,14 +59,13 @@ export default function EditUser() {
 
   useEffect(() => {
     const fetchBanks = async () => {
-        const response = await fetch('/api/banks');
-        if (response.ok) {
-          const data = await response.json();
-          setBanks(data);
-        } else {
-          setError('Failed to fetch banks.');
-        }
-      };
+      try {
+        const fetchedBanks = await getCachedBankList();
+        setBanks(fetchedBanks);
+      } catch (err) {
+        setError('Failed to fetch banks.');
+      }
+    };
 
     fetchBanks();
   }, []);
@@ -115,82 +115,84 @@ export default function EditUser() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          Edit User Information
-        </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="bank-label">Bank</InputLabel>
-            <Select
-              labelId="bank-label"
-              id="bank"
-              value={bank_code}
-              label="Bank"
-              onChange={handleBankChange}
-            >
-              {banks.map((bank) => (
-                <MenuItem key={bank.id} value={bank.code}>
-                  {bank.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {/* Hiển thị logo và tên ngân hàng */}
-          {selectedBank && (
-            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-              <Avatar
-                src={selectedBank.logo}
-                alt={selectedBank.name}
-                sx={{ width: 40, height: 40, mr: 2 }}
-              />
-              <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
-            </Box>
-          )}
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="bank_account"
-            label="Bank Account"
-            name="bank_account"
-            value={bank_account}
-            onChange={(e) => setBankAccount(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Full Name"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            fullWidth
-            name="password"
-            label="New Password (leave blank to keep unchanged)"
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-            Update Information
-          </Button>
+    <UserLayout>
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography component="h1" variant="h5">
+            Edit User Information
+          </Typography>
+          {error && <Alert severity="error">{error}</Alert>}
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="bank-label">Bank</InputLabel>
+              <Select
+                labelId="bank-label"
+                id="bank"
+                value={bank_code}
+                label="Bank"
+                onChange={handleBankChange}
+              >
+                {banks.map((bank) => (
+                  <MenuItem key={bank.id} value={bank.code}>
+                    {bank.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {/* Hiển thị logo và tên ngân hàng */}
+            {selectedBank && (
+              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                <Avatar
+                  src={selectedBank.logo}
+                  alt={selectedBank.name}
+                  sx={{ width: 40, height: 40, mr: 2 }}
+                />
+                <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
+              </Box>
+            )}
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="bank_account"
+              label="Bank Account"
+              name="bank_account"
+              value={bank_account}
+              onChange={(e) => setBankAccount(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="name"
+              label="Full Name"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              name="password"
+              label="New Password (leave blank to keep unchanged)"
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+              Update Information
+            </Button>
+          </Box>
         </Box>
-      </Box>
-    </Container>
+      </Container>
+    </UserLayout>
   );
 }
