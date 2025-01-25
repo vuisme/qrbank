@@ -12,6 +12,7 @@ import {
   Paper,
   Button,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Members() {
   const [members, setMembers] = useState([]);
@@ -34,6 +35,28 @@ export default function Members() {
 
     fetchMembers();
   }, [router]);
+
+ const handleDelete = async (userid) => {
+    if (confirm(`Bạn có chắc chắn muốn xóa thành viên ${userid}?`)) {
+      const response = await fetch('/api/admin/delete_member', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('tokenAdmin')}`,
+        },
+        body: JSON.stringify({ userid }),
+      });
+
+      if (response.ok) {
+        // Xóa thành viên khỏi danh sách hiển thị
+        setMembers(members.filter((member) => member.userid !== userid));
+        alert('Member deleted successfully.');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to delete member.');
+      }
+    }
+  };
 
   return (
     <AdminLayout>
@@ -65,9 +88,17 @@ export default function Members() {
                     variant="contained"
                     color="primary"
                     component={Link}
-                    href={`/admin/edit_member?id=${member.userid}`}
+                    href={`/admin/edit-member?id=${member.userid}`}
                   >
                     Edit
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => handleDelete(member.userid)}
+                    startIcon={<DeleteIcon />}
+                  >
+                    Delete
                   </Button>
                 </TableCell>
               </TableRow>
