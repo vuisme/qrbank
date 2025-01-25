@@ -1,8 +1,9 @@
 import { query, hashPassword } from '../../../lib/db';
+import isAdmin from '../../../middleware/isAdmin'; // Import middleware
 
-export default async function handler(req, res) {
+async function handler(req, res) { // Không cần async function nếu không có await bên trong
   if (req.method === 'POST') {
-    const { userid, bank_code, bank_account, usertype, password, name } = req.body; // Thêm name
+    const { userid, bank_code, bank_account, usertype, password, name } = req.body;
 
     try {
       // Hash mật khẩu trước khi lưu
@@ -11,8 +12,8 @@ export default async function handler(req, res) {
       // Thêm thành viên vào database
       await query({
         query:
-          'INSERT INTO members (userid, bank_code, bank_account, usertype, password, name) VALUES ($1, $2, $3, $4, $5, $6)', // Thêm name
-        values: [userid, bank_code, bank_account, usertype, hashedPassword, name], // Thêm name
+          'INSERT INTO members (userid, bank_code, bank_account, usertype, password, name) VALUES ($1, $2, $3, $4, $5, $6)',
+        values: [userid, bank_code, bank_account, usertype, hashedPassword, name],
       });
       res.status(200).json({ message: 'Member added successfully.' });
     } catch (error) {
@@ -24,3 +25,5 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+export default isAdmin(handler); // Wrap handler với isAdmin middleware

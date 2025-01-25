@@ -1,13 +1,14 @@
 import { query, hashPassword } from '../../../lib/db';
+import isAdmin from '../../../middleware/isAdmin';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method === 'PUT') {
-    const { userid, bank_code, bank_account, usertype, password, name } = req.body; // Thêm name
+    const { userid, bank_code, bank_account, usertype, password, name } = req.body;
 
     try {
       let updateQuery =
-        'UPDATE members SET bank_code = $2, bank_account = $3, usertype = $4, name = $5'; // Thêm name
-      let values = [userid, bank_code, bank_account, usertype, name]; // Thêm name
+        'UPDATE members SET bank_code = $2, bank_account = $3, usertype = $4, name = $5';
+      let values = [userid, bank_code, bank_account, usertype, name];
 
       // Kiểm tra xem có cập nhật mật khẩu không
       if (password) {
@@ -38,3 +39,5 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+export default isAdmin(handler);
