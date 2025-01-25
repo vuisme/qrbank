@@ -81,20 +81,23 @@ export default function EditMember() {
 
     const bankBin = selectedBank ? selectedBank.bin : '';
 
+    const dataToSubmit = {
+      userid: id,
+      bank_code: bankBin,
+      bank_account,
+      usertype,
+      password,
+      name,
+    };
+    console.log('Data to submit:', dataToSubmit); // Log data
+
     const response = await fetch('/api/admin/edit_member', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${tokenAdmin}`,
       },
-      body: JSON.stringify({
-        userid: id,
-        bank_code: bankBin,
-        bank_account,
-        usertype,
-        password,
-        name,
-      }),
+      body: JSON.stringify(dataToSubmit), // Truyền data đã log
     });
 
     if (response.ok) {
