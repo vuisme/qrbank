@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   FormHelperText,
+  Link,
 } from '@mui/material';
 
 export default function Register() {
@@ -113,10 +114,26 @@ export default function Register() {
             onChange={(e) => setUserid(e.target.value)}
           />
           <FormHelperText>
-            Định dạng liên kết tạo mã QR là:{' '}
-            <a href={`https://qr.vutn.net/${userid}/100k`} target="_blank" rel="noopener noreferrer">
-              https://qr.vutn.net/{userid}/100k
-            </a>
+            <Typography variant="body2" color="textSecondary" component="span">
+              <Box component="span" sx={{ display: 'block', mb: 1 }}>
+                Lưu ý: User ID sẽ được sử dụng trong liên kết tạo mã QR.
+              </Box>
+              <Box component="span" sx={{ display: 'block' }}>
+                Định dạng liên kết:{' '}
+                <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                  https://qr.vutn.net/
+                </Box>
+                <Box component="span" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                  {userid || '<userid>'}
+                </Box>
+                <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                  /
+                </Box>
+                <Box component="span" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                  {'<số tiền>'}
+                </Box>
+              </Box>
+            </Typography>
           </FormHelperText>
           <TextField
             margin="normal"
