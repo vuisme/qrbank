@@ -1,5 +1,5 @@
-import { query } from '../../lib/db';
-import { comparePassword } from '../../lib/api';
+import { query } from '../../../lib/db';
+import { comparePassword } from '../../../lib/api';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
