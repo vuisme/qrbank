@@ -17,7 +17,7 @@ import {
 
 export default function EditMember() {
   const [bankCode, setBankCode] = useState('');
-  const [bankAccount, setBankAccount] = useState(''); // Giá trị mặc định là ''
+  const [bankAccount, setBankAccount] = useState('');
   const [usertype, setUsertype] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -41,7 +41,6 @@ export default function EditMember() {
         const banksData = await banksResponse.json();
         setBanks(banksData);
 
-        // Chỉ fetch member data nếu có id
         if (id) {
           const memberResponse = await fetch(`/api/admin/get_member?userid=${id}`, {
             headers: { Authorization: `Bearer ${tokenAdmin}` },
