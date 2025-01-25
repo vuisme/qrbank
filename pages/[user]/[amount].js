@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import QRResult from '../../components/QRResult';
+import { generateQRCodeData } from '../../lib/api';
 import {
   Container,
   Typography,
