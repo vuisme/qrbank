@@ -92,7 +92,7 @@ export default function Register() {
     if (/^[a-zA-Z0-9]*$/.test(value)) {
       setUserid(value.toLowerCase()); // Chuyển đổi sang chữ thường
     } else {
-        setError('User ID must contain only letters and numbers.');
+        setError('Mã thành viên chỉ bao gồm chữ và số, không có kí tự đặc biệt!');
     }
   };
 
@@ -107,7 +107,7 @@ export default function Register() {
         }}
       >
         <Typography component="h1" variant="h5">
-          Register
+          Đăng Kí
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
@@ -116,7 +116,7 @@ export default function Register() {
             required
             fullWidth
             id="userid"
-            label="User ID"
+            label="Mã thành viên"
             name="userid"
             autoFocus
             value={userid}
@@ -134,7 +134,7 @@ export default function Register() {
                   https://qr.vutn.net/
                 </Box>
                 <Box component="span" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                  {userid || '<userid>'}
+                  {userid || '<mã thành viên>'}
                 </Box>
                 <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                   /
@@ -150,7 +150,7 @@ export default function Register() {
             required
             fullWidth
             name="password"
-            label="Password"
+            label="Mật khẩu"
             type="password"
             id="password"
             value={password}
@@ -164,7 +164,7 @@ export default function Register() {
             required
             fullWidth
             name="confirmPassword"
-            label="Confirm Password"
+            label="Nhập lại mật khẩu"
             type="password"
             id="confirmPassword"
             value={confirmPassword}
@@ -175,7 +175,7 @@ export default function Register() {
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label="Địa chỉ Email"
             name="email"
             autoComplete="email"
             value={email}
@@ -189,13 +189,13 @@ export default function Register() {
             required
             fullWidth
             id="name"
-            label="Full Name"
+            label="Tên đầy đủ"
             name="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
           <FormHelperText>
-            Họ tên đầy đủ (sẽ hiển thị khi tạo QR code).
+            Họ tên đầy đủ của cá nhân hoặc cửa hàng hiển thị ở trang mã QR.
           </FormHelperText>
           <FormControl fullWidth margin="normal">
             <InputLabel id="bank-code-label">Bank</InputLabel>
@@ -203,12 +203,12 @@ export default function Register() {
               labelId="bank-code-label"
               id="bank-code"
               value={bankCode}
-              label="Bank"
+              label="Ngân hàng"
               onChange={(e) => setBankCode(e.target.value)}
             >
               {banks.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
-                  {bank.name}
+                  {bank.shortName} - {bank.name}
                 </MenuItem>
               ))}
             </Select>
@@ -218,7 +218,7 @@ export default function Register() {
             required
             fullWidth
             id="bank_account"
-            label="Bank Account"
+            label="Số tài khoản"
             name="bank_account"
             value={bankAccount}
             onChange={(e) => setBankAccount(e.target.value)}
@@ -227,7 +227,7 @@ export default function Register() {
             Nhập chính xác số tài khoản để tạo mã QR.
           </FormHelperText>
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-            Register
+            Đăng Kí
           </Button>
         </Box>
       </Box>
