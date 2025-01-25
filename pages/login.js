@@ -8,8 +8,10 @@ import {
   Box,
   Alert,
 } from '@mui/material';
+import withReCAPTCHA from '../components/withReCAPTCHA'; // Import HOC
 
-export default function Login() {
+function Login({ recaptchaToken }) {
+  // Nhận recaptchaToken từ props
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,13 +25,16 @@ export default function Login() {
     const response = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userid, password }),
+      body: JSON.stringify({
+        userid,
+        password,
+        recaptcha: recaptchaToken, // Truyền recaptchaToken vào body
+      }),
     });
 
     if (response.ok) {
       const data = await response.json();
       localStorage.setItem('token', data.token);
-      // Chuyển hướng đến trang /manage hoặc trang redirect
       router.push(redirect || '/manage');
     } else {
       const data = await response.json();
@@ -82,3 +87,5 @@ export default function Login() {
     </Container>
   );
 }
+
+export default withReCAPTCHA(Login, 'login'); // Wrap Login component với withReCAPTCHA HOC
