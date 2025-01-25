@@ -17,6 +17,7 @@ export default function DeleteMember() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
     const response = await fetch('/api/admin/delete_member', {
       method: 'POST',
       headers: {

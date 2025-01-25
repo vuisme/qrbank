@@ -17,13 +17,17 @@ export default function Settings() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
-    if (isAdminLoggedIn !== 'true') {
+    const tokenAdmin = localStorage.getItem('tokenAdmin');
+    if (!tokenAdmin) {
       router.push('/admin/login');
     }
 
     const fetchSettings = async () => {
-      const res = await fetch('/api/admin/get_settings');
+      const res = await fetch('/api/admin/get_settings', {
+        headers: {
+          Authorization: `Bearer ${tokenAdmin}`, // Gửi token trong header
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         setApiKey(data.api_key || '');
@@ -41,7 +45,7 @@ export default function Settings() {
     event.preventDefault();
     const response = await fetch('/api/admin/update_settings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenAdmin}` },
       body: JSON.stringify({ apiKey, apiServer }),
     });
 
