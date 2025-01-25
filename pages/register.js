@@ -58,6 +58,12 @@ export default function Register() {
       return;
     }
 
+    // Kiểm tra tất cả các trường bắt buộc đã được điền
+    if (!userid || !password || !email || !name || !bankCode || !bankAccount) {
+        setError('Please fill in all required fields.');
+        return;
+      }
+
     const response = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -108,7 +114,7 @@ export default function Register() {
           />
           <FormHelperText>
             Định dạng liên kết tạo mã QR là:{' '}
-            <a href={`https://qr.vutn.net/${userid}/100k`} target="_blank">
+            <a href={`https://qr.vutn.net/${userid}/100k`} target="_blank" rel="noopener noreferrer">
               https://qr.vutn.net/{userid}/100k
             </a>
           </FormHelperText>
@@ -187,7 +193,7 @@ export default function Register() {
             id="bank_account"
             label="Bank Account"
             name="bank_account"
-            value={bank_account}
+            value={bankAccount}
             onChange={(e) => setBankAccount(e.target.value)}
           />
           <FormHelperText>
