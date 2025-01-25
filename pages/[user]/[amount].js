@@ -53,8 +53,9 @@ export default function GenerateQR() {
       if (res.ok && data) {
         setBankCode(data.bank_code);
         setBankAccount(data.bank_account);
-        setUserName(data.name); // Sửa ở đây, set name cho userName
+        setUserName(data.name);
 
+        // Lấy thông tin ngân hàng từ bankCode đã có (sử dụng bin)
         const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
         if (bankInfoRes.ok) {
           const bankInfo = await bankInfoRes.json();
@@ -83,28 +84,17 @@ export default function GenerateQR() {
         const numericAmount = parseAmount(amount);
 
         try {
-          // Lấy danh sách ngân hàng từ cache để tìm bankBin
-          const banks = await getCachedBankList();
-          const bank = banks.find((b) => b.bin === bankCode);
-
-          if (!bank) {
-            setError('Invalid bank code.');
-            setIsLoading(false);
-            return;
-          }
-
-          // Tạo mã QR data (text)
+          // Tạo mã QR data (text) trực tiếp, không cần tìm bankBin
           const qrCodeData = await generateQRCodeData({
-            bankBin: bank.bin,
+            bankBin: bankCode, // Sử dụng bankCode trực tiếp (đã là bin)
             bankNumber: bankAccount,
             amount: numericAmount,
-            purpose: 'Thanh toan QR', // Bạn có thể thay đổi nội dung này
+            purpose: 'Thanh toan QR',
           });
 
-          // Chuyển đổi mã QR thành base64 (nếu cần hiển thị dưới dạng ảnh)
+          // Chuyển đổi mã QR thành base64
           const base64Data = Buffer.from(qrCodeData).toString('base64');
-
-          setQrData(base64Data); // Cập nhật state qrData với base64 data
+          setQrData(base64Data);
         } catch (error) {
           console.error(error);
           setError(error.message || 'Failed to generate QR code.');
@@ -112,6 +102,7 @@ export default function GenerateQR() {
       }
       setIsLoading(false);
     };
+
     if (bankAccount && bankCode && amount) {
       generateQR();
     }
@@ -128,7 +119,7 @@ export default function GenerateQR() {
           }}
         >
           <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-            Quét mã QR để thanh toán
+            Mã VietQR thanh toán
           </Typography>
 
           <Box
@@ -166,7 +157,7 @@ export default function GenerateQR() {
                 Tên chủ TK:
               </Typography>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {userName ? userName.toUpperCase() : ''} {/* Sửa ở đây, thay user thành userName */}
+                {userName ? userName.toUpperCase() : ''}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -182,7 +173,6 @@ export default function GenerateQR() {
                 Số tiền:
               </Typography>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {/* Sử dụng numericAmount để định dạng */}
                 {parseAmount(amount).toLocaleString('vi-VN', {
                   style: 'currency',
                   currency: 'VND',
@@ -204,7 +194,7 @@ export default function GenerateQR() {
           )}
 
           <Typography variant="caption" color="textSecondary" align="center">
-            Sản phẩm được cung cấp bởi VuTN.net
+            Mở ứng dụng ngân hàng quét mã QR
           </Typography>
         </Box>
       </Paper>
