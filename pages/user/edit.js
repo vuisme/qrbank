@@ -14,7 +14,7 @@ import {
   Avatar,
 } from '@mui/material';
 import UserLayout from '../../components/UserLayout';
-import Meta from '../components/Meta';
+import Meta from '../../components/Meta';
 
 export default function EditUser() {
   const [bankCode, setBankCode] = useState(''); // Sử dụng bankCode thay thế
