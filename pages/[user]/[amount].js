@@ -79,13 +79,15 @@ export default function GenerateQR() {
           setBankCode(data.bank_code);
           setBankAccount(data.bank_account);
           setUserName(data.name);
-          console.log(data.bank_code);
+
+          // Khai báo biến bankInfo ở đây và gán giá trị mặc định
+          let bankInfo = { shortName: '', name: '', logo: '' };
+
           const bankInfoRes = await fetch(
             `/api/banks?bankCode=${data.bank_code}`
           );
           if (bankInfoRes.ok) {
-            const bankInfo = await bankInfoRes.json();
-            console.log(bankInfo);
+            bankInfo = await bankInfoRes.json(); // Gán giá trị cho bankInfo
             setBankName(bankInfo.shortName || bankInfo.name);
             setBankLogo(bankInfo.logo);
           } else {
@@ -105,8 +107,8 @@ export default function GenerateQR() {
                 amount: numAmount,
                 user,
                 userName: data.name,
-                bankName: bankInfo.shortName || bankInfo.name,
-                bankLogo: bankInfo.logo,
+                bankName: bankInfo.shortName || bankInfo.name, // Sử dụng bankInfo ở đây
+                bankLogo: bankInfo.logo, // Sử dụng bankInfo ở đây
               }),
             });
 
