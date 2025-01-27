@@ -249,7 +249,7 @@ export default function GenerateQR() {
           )}
 
           <Typography variant="caption" color="textSecondary" align="center">
-            Cung cấp bởi VuTN.net
+            Cung cấp bởi MaQR.Top
           </Typography>
         </Box>
       </Paper>
