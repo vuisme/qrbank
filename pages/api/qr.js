@@ -1,5 +1,5 @@
 import { generateQRCodeData } from '../../lib/api';
-import { getCachedBankList, verifyRecaptcha } from '../../lib/db'; // Thêm verifyRecaptcha
+import { getCachedBankList } from '../../lib/db';
 import QRCode from 'qrcode';
 import Redis from 'ioredis';
 
@@ -7,13 +7,7 @@ const redis = new Redis(process.env.REDIS_URL);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { bankAccount, bankCode, amount, recaptcha, user } = req.body;
-
-    // Verify reCAPTCHA token (nếu cần)
-    const isRecaptchaValid = await verifyRecaptcha(recaptcha);
-    if (!isRecaptchaValid) {
-        return res.status(400).json({ error: 'reCAPTCHA verification failed.' });
-    }
+    const { bankAccount, bankCode, amount, user } = req.body;
 
     try {
       // Lấy danh sách ngân hàng từ cache để tìm bankBin
