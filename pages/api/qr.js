@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     try {
       // Kiểm tra cache trước
       const cachedData = await redis.get(redisKey);
-      console.log("Cached data:", cachedData);
+      console.log("qr.js cachedData", cachedData)
       if (cachedData) {
         const parsedData = JSON.parse(cachedData);
         res.status(200).json({ qr_code_data: parsedData.qrData });
@@ -43,23 +43,14 @@ export default async function handler(req, res) {
       const qrCodeData = await generateQRCodeData({
         bankBin: bank.bin,
         bankNumber: bankAccount,
-        amount: amount,
+        amount: amount, // Truyền amount trực tiếp, không ép kiểu
         purpose: 'Thanh toan QR',
       });
 
       // Chuyển đổi QR code text thành data URL của ảnh PNG
       const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
 
-      console.log("qrCodeData:", qrCodeData); // Log qrCodeData
-      try {
-        const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
-        console.log("qrCodeBase64:", qrCodeBase64); // Log qrCodeBase64
-      } catch (error) {
-        console.error("Error converting to base64:", error);
-        return res.status(500).json({ error: 'Failed to convert QR code to base64.' });
-      }
       // Lưu thông tin vào Redis với thời hạn 1 ngày (86400 giây)
-      console.log("Saving to cache:", { redisKey, data: { qrData: qrCodeBase64, bankName, bankLogo, userName, bankAccount, amount } });
       await redis.set(
         redisKey,
         JSON.stringify({
@@ -68,13 +59,12 @@ export default async function handler(req, res) {
           bankLogo: bankLogo,
           userName: userName,
           bankAccount: bankAccount,
-          amount: amount.toString(),
+          amount: amount, // Lưu amount dạng chuỗi
         }),
         'EX',
         86400
       );
 
-      
       res.status(200).json({ qr_code_data: qrCodeBase64 });
     } catch (error) {
       console.error(error);
