@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { getCachedQRData } from '../../lib/api';
 import ReactGA from 'react-ga4';
+import Head from 'next/head';
 
 export default function GenerateQR() {
   const router = useRouter();
@@ -139,128 +140,140 @@ export default function GenerateQR() {
   }, [user, amount]);
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Paper elevation={4} sx={{ p: 3, mt: 4, borderRadius: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Typography
-            component="h1"
-            variant="h5"
-            sx={{ fontWeight: 'bold', mb: 2 }}
-          >
-            Quét Mã QR Để Thanh Toán
-          </Typography>
-
+    <>
+      <Head>
+          <title>Quét mã QR để thanh toán - {user ? user : 'VuTN.net'}</title>
+          <meta name="description" content={`Quét mã QR để thanh toán cho ${userName ? userName : 'người dùng'} với số tiền ${amount ? formatAmountDisplay(amount) : ''} qua ngân hàng ${bankName ? bankName : ''}`} />
+          <meta name="keywords" content="quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code" />
+          <meta property="og:title" content={`Quét mã QR để thanh toán - ${user ? user : 'VuTN.net'}`} />
+          <meta property="og:description" content={`Quét mã QR để thanh toán cho ${userName ? userName : 'người dùng'} với số tiền ${amount ? formatAmountDisplay(amount) : ''} qua ngân hàng ${bankName ? bankName : ''}`} />
+          <meta property="og:url" content={`https://maqr.top/${user}/${amount}`} /> {/* Thay bằng URL thực tế */}
+          <meta property="og:type" content="website" />
+          {/* Thêm các thẻ meta khác nếu cần */}
+      </Head>
+      <Container component="main" maxWidth="xs">
+        <Paper elevation={4} sx={{ p: 3, mt: 4, borderRadius: 2 }}>
           <Box
             sx={{
-              border: '1px solid #ccc',
-              borderRadius: 2,
-              p: 2,
-              mb: 2,
-              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
+            <Typography
+              component="h1"
+              variant="h5"
+              sx={{ fontWeight: 'bold', mb: 2 }}
+            >
+              Quét Mã QR Để Thanh Toán
+            </Typography>
+
             <Box
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mb: 1,
+                border: '1px solid #ccc',
+                borderRadius: 2,
+                p: 2,
+                mb: 2,
+                width: '100%',
               }}
             >
-              {/* Hiển thị logo ngân hàng */}
-              {bankLogo ? (
-                <img src={bankLogo} alt={bankName} width={80} />
-              ) : isLoading ? (
-                <CircularProgress size={24} />
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 1,
+                }}
+              >
+                {/* Hiển thị logo ngân hàng */}
+                {bankLogo ? (
+                  <img src={bankLogo} alt={bankName} width={80} />
+                ) : isLoading ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <Typography variant="body1">&nbsp;</Typography>
+                )}
+              </Box>
+              <Divider sx={{ mb: 2 }} />
+              {isLoading ? (
+                <CircularProgress sx={{ mt: 2 }} />
+              ) : qrData ? (
+                <QRResult qrData={qrData} />
               ) : (
-                <Typography variant="body1">&nbsp;</Typography>
+                <Typography>Đang tạo mã QR...</Typography>
               )}
+              <Divider sx={{ mt: 2 }} />
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mt: 1,
+                }}
+              >
+                <Typography variant="subtitle2" color="textSecondary">
+                  Tên chủ TK:
+                </Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {userName ? userName.toUpperCase() : ''}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Typography variant="subtitle2" color="textSecondary">
+                  Số tài khoản:
+                </Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {bankAccount}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Typography variant="subtitle2" color="textSecondary">
+                  Số tiền:
+                </Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                  {/* Hiển thị số tiền đã format */}
+                  {formatAmountDisplay(amount)}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mt: 1,
+                }}
+              >
+                <Typography variant="caption" color="textSecondary">
+                  {bankName && `(${bankName})`}
+                </Typography>
+              </Box>
             </Box>
-            <Divider sx={{ mb: 2 }} />
-            {isLoading ? (
-              <CircularProgress sx={{ mt: 2 }} />
-            ) : qrData ? (
-              <QRResult qrData={qrData} />
-            ) : (
-              <Typography>Đang tạo mã QR...</Typography>
+
+            {/* Hiển thị lỗi nếu có */}
+            {error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
             )}
-            <Divider sx={{ mt: 2 }} />
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                mt: 1,
-              }}
-            >
-              <Typography variant="subtitle2" color="textSecondary">
-                Tên chủ TK:
-              </Typography>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {userName ? userName.toUpperCase() : ''}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Typography variant="subtitle2" color="textSecondary">
-                Số tài khoản:
-              </Typography>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {bankAccount}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Typography variant="subtitle2" color="textSecondary">
-                Số tiền:
-              </Typography>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {/* Hiển thị số tiền đã format */}
-                {formatAmountDisplay(amount)}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mt: 1,
-              }}
-            >
-              <Typography variant="caption" color="textSecondary">
-                {bankName && `(${bankName})`}
-              </Typography>
-            </Box>
+
+            <Typography variant="caption" color="textSecondary" align="center">
+              Cung cấp bởi MaQR.Top
+            </Typography>
           </Box>
-
-          {/* Hiển thị lỗi nếu có */}
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Typography variant="caption" color="textSecondary" align="center">
-            Cung cấp bởi MaQR.Top
-          </Typography>
-        </Box>
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </>
   );
 }
