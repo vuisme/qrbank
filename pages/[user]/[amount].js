@@ -147,7 +147,6 @@ export default function GenerateQR() {
           <meta name="keywords" content="quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code" />
           <meta property="og:title" content={`Quét mã QR để thanh toán - ${user ? user : 'VuTN.net'}`} />
           <meta property="og:description" content={`Quét mã QR để thanh toán cho ${userName ? userName : 'người dùng'} với số tiền ${amount ? formatAmountDisplay(amount) : ''} qua ngân hàng ${bankName ? bankName : ''}`} />
-          <meta property="og:url" content={`https://maqr.top/${user}/${amount}`} /> {/* Thay bằng URL thực tế */}
           <meta property="og:type" content="website" />
           {/* Thêm các thẻ meta khác nếu cần */}
       </Head>
