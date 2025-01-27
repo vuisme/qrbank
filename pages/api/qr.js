@@ -58,6 +58,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Failed to convert QR code to base64.' });
       }
       // Lưu thông tin vào Redis với thời hạn 1 ngày (86400 giây)
+      console.log("Saving to cache:", { redisKey, data: { qrData: qrCodeBase64, bankName, bankLogo, userName, bankAccount, amount } });
       await redis.set(
         redisKey,
         JSON.stringify({
@@ -66,12 +67,15 @@ export default async function handler(req, res) {
           bankLogo: bankLogo,
           userName: userName,
           bankAccount: bankAccount,
-          amount: amount,
+          amount: amount.toString(),
         }),
         'EX',
         86400
       );
 
+      // Khi đọc cache:
+      const cachedData = await redis.get(redisKey);
+      console.log("Cached data:", cachedData);
       res.status(200).json({ qr_code_data: qrCodeBase64 });
     } catch (error) {
       console.error(error);
