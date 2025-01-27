@@ -245,7 +245,7 @@ function Register({ recaptchaToken }) {
             >
               {banks.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
-                  {bank.name}
+                  {bank.code} - {bank.name}
                 </MenuItem>
               ))}
             </Select>
