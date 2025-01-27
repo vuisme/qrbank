@@ -11,6 +11,7 @@ import {
   Paper,
 } from '@mui/material';
 import { getCachedQRData } from '../../lib/api';
+import ReactGA from 'react-ga4';
 
 export default function GenerateQR() {
   const router = useRouter();
@@ -109,6 +110,13 @@ export default function GenerateQR() {
             if (qrRes.ok) {
               const { qr_code_data } = await qrRes.json();
               setQrData(qr_code_data);
+              if (typeof window !== 'undefined' && window.gtag) {
+                window.gtag("event", "generate_qr_success", {
+                  event_category: "QR Code",
+                  event_label: "QR Code Generated",
+                  value: amount, // Có thể gửi thêm giá trị amount
+                });
+              }
             } else {
               const errorData = await qrRes.json();
               setError(errorData.error || 'Failed to generate QR code.');
