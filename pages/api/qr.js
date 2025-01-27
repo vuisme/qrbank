@@ -30,18 +30,13 @@ export default async function handler(req, res) {
       const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
 
       // Tạo key cho Redis (user:amount)
-      const redisKey = `<span class="math-inline">\{user\}\:</span>{amount}`;
+      const redisKey = `${user}:${amount}`;
 
-      // Lưu dữ liệu vào Redis với thời hạn 1 ngày (86400 giây)
+      // Lưu QR code vào Redis với thời hạn 1 ngày (86400 giây)
       await redis.set(
         redisKey,
         JSON.stringify({
-          qrData: qrCodeBase64, // Dữ liệu base64 của mã QR
-          bankName: bank.shortName || bank.name,
-          bankLogo: bank.logo,
-          bankAccount,
-          userName: user, // Thông tin user (tùy chỉnh)
-          amount
+          qrData: qrCodeBase64 // Chỉ lưu base64 data của QR code
         }),
         'EX',
         86400
