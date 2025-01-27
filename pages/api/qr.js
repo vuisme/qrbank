@@ -23,6 +23,7 @@ export default async function handler(req, res) {
     try {
       // Kiểm tra cache trước
       const cachedData = await redis.get(redisKey);
+      console.log("Cached data:", cachedData);
       if (cachedData) {
         const parsedData = JSON.parse(cachedData);
         res.status(200).json({ qr_code_data: parsedData.qrData });
@@ -73,9 +74,7 @@ export default async function handler(req, res) {
         86400
       );
 
-      // Khi đọc cache:
-      const cachedData = await redis.get(redisKey);
-      console.log("Cached data:", cachedData);
+      
       res.status(200).json({ qr_code_data: qrCodeBase64 });
     } catch (error) {
       console.error(error);
