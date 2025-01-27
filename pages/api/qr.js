@@ -49,6 +49,14 @@ export default async function handler(req, res) {
       // Chuyển đổi QR code text thành data URL của ảnh PNG
       const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
 
+      console.log("qrCodeData:", qrCodeData); // Log qrCodeData
+      try {
+        const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
+        console.log("qrCodeBase64:", qrCodeBase64); // Log qrCodeBase64
+      } catch (error) {
+        console.error("Error converting to base64:", error);
+        return res.status(500).json({ error: 'Failed to convert QR code to base64.' });
+      }
       // Lưu thông tin vào Redis với thời hạn 1 ngày (86400 giây)
       await redis.set(
         redisKey,
