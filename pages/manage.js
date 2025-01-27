@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UserLayout from '../components/UserLayout';
+import Meta from '../components/Meta';
 import Link from 'next/link';
 
 export default function Manage() {
@@ -73,6 +74,15 @@ export default function Manage() {
 
   return (
     <UserLayout>
+      <Meta
+        title="Quản lý tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
+        description= "Trang quản lý của Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        keywords="quản lý, manage, quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code, maqr"
+        ogTitle="Quản lý tài khoản Gửi mã QR Thần Tốc - MãQR.TOP"
+        ogDescription="Trang quản lý của Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        ogImage="/qr-code-animation.gif"
+        ogUrl="https://maqr.top/manage"
+      />
       <Container maxWidth="md">
         <Typography variant="h4" component="h1" gutterBottom>
           Quản lý tài khoản
