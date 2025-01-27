@@ -15,6 +15,7 @@ import {
   Avatar,
 } from '@mui/material';
 import withReCAPTCHA from '../components/withReCAPTCHA';
+import Meta from '../components/Meta';
 import { generateQRCodeData } from '../lib/api';
 
 function Register({ recaptchaToken }) {
@@ -134,152 +135,163 @@ function Register({ recaptchaToken }) {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          Đăng Kí
-        </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="userid"
-            label="Mã thành viên"
-            name="userid"
-            autoFocus
-            value={userid}
-            onChange={handleUseridChange}
-            error={!!error} // Thêm error vào TextField
-          />
-          <FormHelperText>
-            <Typography variant="body2" color="textSecondary" component="span">
-              <Box component="span" sx={{ display: 'block', mb: 1 }}>
-                Lưu ý: User ID sẽ được sử dụng trong liên kết tạo mã QR.
-              </Box>
-              <Box component="span" sx={{ display: 'block' }}>
-                Định dạng liên kết:{' '}
-                <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                  https://maqr.top/
-                </Box>
-                <Box component="span" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                  {userid || '<mã thành viên>'}
-                </Box>
-                <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                  /
-                </Box>
-                <Box component="span" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                  {'<số tiền>'}
-                </Box>
-              </Box>
-            </Typography>
-          </FormHelperText>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Mật khẩu"
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <FormHelperText>
-            Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ và số.
-          </FormHelperText>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="confirmPassword"
-            label="Nhập lại mật khẩu"
-            type="password"
-            id="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Địa chỉ Email"
-            name="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <FormHelperText>
-            Vui lòng nhập chính xác email để nhận thông báo.
-          </FormHelperText>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Tên đầy đủ"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <FormHelperText>
-            Họ tên đầy đủ của cá nhân hoặc cửa hàng hiển thị ở trang mã QR.
-          </FormHelperText>
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="bank-label">Ngân Hàng</InputLabel>
-            <Select
-              labelId="bank-label"
-              id="bank"
-              value={bankCode}
-              label="Ngân Hàng"
-              onChange={handleBankChange}
-            >
-              {banks.map((bank) => (
-                <MenuItem key={bank.id} value={bank.code}>
-                  {bank.code} - {bank.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {selectedBank && (
-            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-              <Avatar
-                src={selectedBank.logo}
-                alt={selectedBank.name}
-                sx={{ width: 40, height: 40, mr: 2 }}
-              />
-              <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
-            </Box>
-          )}
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="bank_account"
-            label="Bank Account"
-            name="bank_account"
-            value={bankAccount}
-            onChange={(e) => setBankAccount(e.target.value)}
-            onBlur={handleBankAccountBlur}
-          />
-          <FormHelperText>
-            Nhập chính xác số tài khoản để tạo mã QR.
-          </FormHelperText>
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+    <>
+      <Meta
+        title="Đăng ký tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
+        description= "Trang đăng ký sử dụng Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        keywords="quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code, maqr, dang ky"
+        ogTitle="Đăng ký tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
+        ogDescription="Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        ogImage="/qr-code-animation.gif"
+        ogUrl="https://maqr.top/register"
+      />
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography component="h1" variant="h5">
             Đăng Kí
-          </Button>
+          </Typography>
+          {error && <Alert severity="error">{error}</Alert>}
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="userid"
+              label="Mã thành viên"
+              name="userid"
+              autoFocus
+              value={userid}
+              onChange={handleUseridChange}
+              error={!!error} // Thêm error vào TextField
+            />
+            <FormHelperText>
+              <Typography variant="body2" color="textSecondary" component="span">
+                <Box component="span" sx={{ display: 'block', mb: 1 }}>
+                  Lưu ý: User ID sẽ được sử dụng trong liên kết tạo mã QR.
+                </Box>
+                <Box component="span" sx={{ display: 'block' }}>
+                  Định dạng liên kết:{' '}
+                  <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                    https://maqr.top/
+                  </Box>
+                  <Box component="span" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                    {userid || '<mã thành viên>'}
+                  </Box>
+                  <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                    /
+                  </Box>
+                  <Box component="span" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                    {'<số tiền>'}
+                  </Box>
+                </Box>
+              </Typography>
+            </FormHelperText>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Mật khẩu"
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <FormHelperText>
+              Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ và số.
+            </FormHelperText>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Nhập lại mật khẩu"
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Địa chỉ Email"
+              name="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <FormHelperText>
+              Vui lòng nhập chính xác email để nhận thông báo.
+            </FormHelperText>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="name"
+              label="Tên đầy đủ"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <FormHelperText>
+              Họ tên đầy đủ của cá nhân hoặc cửa hàng hiển thị ở trang mã QR.
+            </FormHelperText>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="bank-label">Ngân Hàng</InputLabel>
+              <Select
+                labelId="bank-label"
+                id="bank"
+                value={bankCode}
+                label="Ngân Hàng"
+                onChange={handleBankChange}
+              >
+                {banks.map((bank) => (
+                  <MenuItem key={bank.id} value={bank.code}>
+                    {bank.code} - {bank.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {selectedBank && (
+              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                <Avatar
+                  src={selectedBank.logo}
+                  alt={selectedBank.name}
+                  sx={{ width: 40, height: 40, mr: 2 }}
+                />
+                <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
+              </Box>
+            )}
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="bank_account"
+              label="Bank Account"
+              name="bank_account"
+              value={bankAccount}
+              onChange={(e) => setBankAccount(e.target.value)}
+              onBlur={handleBankAccountBlur}
+            />
+            <FormHelperText>
+              Nhập chính xác số tài khoản để tạo mã QR.
+            </FormHelperText>
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+              Đăng Kí
+            </Button>
+          </Box>
         </Box>
-      </Box>
-    </Container>
+      </Container>
+    </>  
   );
 }
 

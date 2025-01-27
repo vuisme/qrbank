@@ -46,13 +46,13 @@ function Login({ recaptchaToken }) {
   return (
     <>
       <Meta
-        title="Đăng ký tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
-        description= "Trang đăng ký sử dụng Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        title="Đăng nhập tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
+        description= "Trang đăng nhập sử dụng Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
         keywords="quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code, maqr, dang ky"
-        ogTitle="Đăng ký tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
+        ogTitle="Đăng nhập tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
         ogDescription="Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
         ogImage="/qr-code-animation.gif"
-        ogUrl="https://maqr.top"
+        ogUrl="https://maqr.top/login"
       />
       <Container component="main" maxWidth="xs">
         <Box
