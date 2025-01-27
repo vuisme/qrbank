@@ -168,7 +168,7 @@ function Register({ recaptchaToken }) {
               <Box component="span" sx={{ display: 'block' }}>
                 Định dạng liên kết:{' '}
                 <Box component="span" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                  https://qr.vutn.net/
+                  https://maqr.top/
                 </Box>
                 <Box component="span" sx={{ fontWeight: 'bold', color: 'error.main' }}>
                   {userid || '<mã thành viên>'}

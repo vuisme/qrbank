@@ -1,6 +1,6 @@
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
 import Image from 'next/image';
-import Link from 'next/link'; // Import Link
+import Link from 'next/link';
 import { useSpring, animated } from 'react-spring';
 
 export default function Home() {
@@ -8,6 +8,13 @@ export default function Home() {
     opacity: 1,
     from: { opacity: 0 },
     delay: 500,
+  });
+
+  const linkProps = useSpring({
+    opacity: 1,
+    from: { opacity: 0 },
+    delay: 1000,
+    config: { tension: 200, friction: 20 },
   });
 
   return (
@@ -23,7 +30,7 @@ export default function Home() {
         }}
       >
         <Image
-          src="/qr-code-animation.gif" // Thay bằng hình ảnh động của bạn
+          src="/qr-code-animation.gif"
           alt="QR Code Animation"
           width={300}
           height={300}
@@ -39,6 +46,48 @@ export default function Home() {
             Dịch vụ của chúng tôi sẽ giúp bạn tạo mã QR cho các giao dịch ngân hàng
             một cách tiện lợi.
           </Typography>
+
+          <animated.div style={linkProps}>
+            <Box
+              sx={{
+                mt: 4,
+                p: 3,
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                backgroundColor: '#f8f8f8',
+              }}
+            >
+              <Typography variant="body1" component="p">
+                Chỉ cần gửi link sau để tạo mã QR:
+              </Typography>
+              <Typography
+                variant="h6"
+                component="p"
+                sx={{ fontFamily: 'monospace', mt: 1 }}
+              >
+                maqr.top/
+                <Typography
+                  variant="inherit"
+                  component="span"
+                  sx={{ color: '#0d6efd' }}
+                >
+                  &lt;user&gt;
+                </Typography>
+                /
+                <Typography
+                  variant="inherit"
+                  component="span"
+                  sx={{ color: '#dc3545' }}
+                >
+                  &lt;số tiền&gt;
+                </Typography>
+              </Typography>
+              <Typography variant="body1" component="p" sx={{ mt: 2 }}>
+                Trong đó, <Typography variant="inherit" component='span' sx={{color: '#0d6efd', fontWeight: 'bold'}}>&lt;user&gt;</Typography> là tên người dùng của bạn và <Typography variant="inherit" component='span' sx={{color: '#dc3545', fontWeight: 'bold'}}>&lt;số tiền&gt;</Typography> là số tiền cần thanh toán. Hệ thống sẽ tự động tạo mã QR tương ứng để khách hàng của bạn có thể quét và thanh toán nhanh chóng.
+              </Typography>
+            </Box>
+          </animated.div>
+
           <Box sx={{ mt: 4 }}>
             <Grid container spacing={2} justifyContent="center">
               <Grid item>
