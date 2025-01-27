@@ -10,7 +10,9 @@ import {
   Divider,
   Paper,
 } from '@mui/material';
-import { generateQRCodeData, getUserDataFromCache, saveUserDataToCache } from '../../lib/api';
+import { generateQRCodeData, getQRFromCache } from '../../lib/api';
+
+// Xóa import Redis ở đây
 
 export default function GenerateQR() {
   const router = useRouter();
@@ -21,7 +23,7 @@ export default function GenerateQR() {
   const [bankName, setBankName] = useState('');
   const [userName, setUserName] = useState('');
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Bắt đầu với false
   const [bankLogo, setBankLogo] = useState(null);
 
   // Hàm chuyển đổi chuỗi amount thành số
@@ -50,50 +52,44 @@ export default function GenerateQR() {
       setIsLoading(true);
       setError(null);
 
+      // Tạo key cho Redis
+      const redisKey = `<span class="math-inline">\{user\}\:</span>{amount}`;
+
       try {
-        // Thử lấy thông tin user từ Redis
-        const userCacheKey = `${user}`;
-        const cachedUserData = await getUserDataFromCache(userCacheKey);
+        // Thử lấy dữ liệu từ Redis
+        const cachedData = await getQRFromCache(redisKey);
+        if (cachedData) {
+          setQrData(cachedData.qrData);
+          setBankName(cachedData.bankName);
+          setBankLogo(cachedData.bankLogo);
+          setBankAccount(cachedData.bankAccount);
+          setUserName(cachedData.userName);
+          setIsLoading(false);
+          return; // Kết thúc nếu lấy được từ cache
+        }
 
-        if (cachedUserData) {
-          setBankCode(cachedUserData.bankCode);
-          setBankAccount(cachedUserData.bankAccount);
-          setUserName(cachedUserData.userName);
-          setBankName(cachedUserData.bankName);
-          setBankLogo(cachedUserData.bankLogo);
-        } else {
-          // Nếu không có trong cache, fetch từ API
-          const res = await fetch(`/api/getUserData`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user: user }),
-          });
-          const data = await res.json();
-          if (res.ok && data) {
-            // Lưu thông tin user vào Redis
-            await saveUserDataToCache(userCacheKey, {
-              bankCode: data.bank_code,
-              bankAccount: data.bank_account,
-              userName: data.name,
-              bankName: data.bankName, // Lưu cả bankName
-              bankLogo: data.bankLogo, // Lưu cả bankLogo
-            });
+        // Nếu không có trong cache, fetch từ API
+        const res = await fetch(`/api/getUserData`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: user }),
+        });
+        const data = await res.json();
+        if (res.ok && data) {
+          setBankCode(data.bank_code);
+          setBankAccount(data.bank_account);
+          setUserName(data.name);
 
-            setBankCode(data.bank_code);
-            setBankAccount(data.bank_account);
-            setUserName(data.name);
-
-            const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
-            if (bankInfoRes.ok) {
-              const bankInfo = await bankInfoRes.json();
-              setBankName(bankInfo.shortName || bankInfo.name);
-              setBankLogo(bankInfo.logo);
-            } else {
-              setError('Failed to fetch bank info.');
-            }
+          const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
+          if (bankInfoRes.ok) {
+            const bankInfo = await bankInfoRes.json();
+            setBankName(bankInfo.shortName || bankInfo.name);
+            setBankLogo(bankInfo.logo);
           } else {
-            setError(data?.error || 'User not found.');
+            setError('Failed to fetch bank info.');
           }
+        } else {
+          setError(data?.error || 'User not found.');
         }
       } catch (error) {
         console.error(error);
@@ -103,32 +99,20 @@ export default function GenerateQR() {
       }
     };
 
-    if (user) {
+    if (user && amount) {
       fetchData();
     }
-  }, [user]);
+  }, [user, amount]);
 
   useEffect(() => {
     const generateQR = async () => {
       setIsLoading(true);
       setError(null);
+      if (bankAccount && bankCode && amount) {
+        // Chuyển đổi amount string thành số
+        const numericAmount = parseAmount(amount);
 
-      // Key cho QR code cache
-      const qrCacheKey = `${user}:${amount}`;
-
-      try {
-        // Thử lấy QR code từ cache
-        const cachedQR = await getQRFromCache(qrCacheKey);
-        if (cachedQR) {
-          setQrData(cachedQR);
-          setIsLoading(false);
-          return;
-        }
-
-        // Nếu không có trong cache, tạo QR code mới
-        if (bankAccount && bankCode && amount) {
-          const numericAmount = parseAmount(amount);
-
+        try {
           const res = await fetch('/api/qr', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -137,33 +121,29 @@ export default function GenerateQR() {
               bankCode,
               amount: numericAmount,
               user,
+              amount,
             }),
           });
 
           if (res.ok) {
             const { qr_code_data } = await res.json();
-
-            // Lưu QR code vào cache
-            await saveQRToCache(qrCacheKey, qr_code_data);
-
             setQrData(qr_code_data);
           } else {
             const errorData = await res.json();
             setError(errorData.error || 'Failed to generate QR code.');
           }
+        } catch (error) {
+          console.error(error);
+          setError(error.message || 'Failed to generate QR code.');
         }
-      } catch (error) {
-        console.error(error);
-        setError(error.message || 'Failed to generate QR code.');
       }
-
       setIsLoading(false);
     };
 
     if (bankAccount && bankCode && amount) {
       generateQR();
     }
-  }, [bankAccount, bankCode, amount, user]);
+  }, [bankAccount, bankCode, amount]);
 
   return (
     <Container component="main" maxWidth="xs">
