@@ -10,7 +10,7 @@ import {
   Divider,
   Paper,
 } from '@mui/material';
-import { generateQRCodeData } from '../../lib/api';
+import { generateQRCodeData, getUserDataFromCache, saveUserDataToCache } from '../../lib/api';
 
 export default function GenerateQR() {
   const router = useRouter();
