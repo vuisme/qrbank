@@ -10,7 +10,7 @@ import {
   Divider,
   Paper,
 } from '@mui/material';
-import { getCachedQRData } from '../../lib/api';
+import { generateQRCodeData, getQRFromCache } from '../../lib/api'; // Import getQRFromCache
 
 export default function GenerateQR() {
   const router = useRouter();
@@ -23,6 +23,28 @@ export default function GenerateQR() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [bankLogo, setBankLogo] = useState(null);
+  const [numericAmount, setNumericAmount] = useState(0);
+
+  // Hàm chuyển đổi chuỗi amount thành số
+  const parseAmount = (amountStr) => {
+    if (!amountStr) return 0;
+
+    const multiplier = {
+      k: 1000,
+      m: 1000000,
+      // Có thể thêm các đơn vị khác (ví dụ: b cho billion)
+    };
+
+    const lowerCaseAmount = amountStr.toLowerCase();
+    const lastChar = lowerCaseAmount.slice(-1);
+
+    if (multiplier[lastChar]) {
+      const numPart = parseFloat(lowerCaseAmount.slice(0, -1));
+      return numPart * multiplier[lastChar];
+    } else {
+      return parseFloat(amountStr);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,15 +53,17 @@ export default function GenerateQR() {
 
       // Tạo key cho Redis
       const redisKey = `${user}:${amount}`;
+
       try {
         // Thử lấy dữ liệu từ Redis
-        const cachedData = await getCachedQRData(redisKey);
+        const cachedData = await getQRFromCache(redisKey);
         if (cachedData) {
           setQrData(cachedData.qrData);
           setBankName(cachedData.bankName);
           setBankLogo(cachedData.bankLogo);
           setBankAccount(cachedData.bankAccount);
           setUserName(cachedData.userName);
+          setNumericAmount(cachedData.amount); // Sử dụng amount từ cache
           setIsLoading(false);
           return; // Kết thúc nếu lấy được từ cache
         }
@@ -70,6 +94,8 @@ export default function GenerateQR() {
             setError('Failed to fetch bank info.');
           }
 
+          // Chuyển đổi amount string thành số và tạo QR code ngay sau khi có thông tin user
+          setNumericAmount(amount);
           if (data.bank_account && data.bank_code) {
             const qrRes = await fetch('/api/qr', {
               method: 'POST',
@@ -77,11 +103,11 @@ export default function GenerateQR() {
               body: JSON.stringify({
                 bankAccount: data.bank_account,
                 bankCode: data.bank_code,
-                amount: amount, // Truyền trực tiếp amount vào đây
+                amount: amount,
                 user,
                 userName: data.name,
-                bankName: bankInfo.shortName || bankInfo.name,
-                bankLogo: bankInfo.logo,
+                bankName: bankInfo.shortName || bankInfo.name, // Sử dụng bankInfo ở đây
+                bankLogo: bankInfo.logo, // Sử dụng bankInfo ở đây
               }),
             });
 
@@ -202,8 +228,8 @@ export default function GenerateQR() {
                 Số tiền:
               </Typography>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {/* Hiển thị amount trực tiếp từ router.query */}
-                {Number(amount).toLocaleString('vi-VN', {
+                {/* Sử dụng numericAmount ở đây */}
+                {numericAmount.toLocaleString('vi-VN', {
                   style: 'currency',
                   currency: 'VND',
                 })}
