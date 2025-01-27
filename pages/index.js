@@ -2,6 +2,7 @@ import { Container, Typography, Box, Button, Grid } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSpring, animated } from 'react-spring';
+import Meta from '../components/Meta';
 
 export default function Home() {
   const props = useSpring({
@@ -18,7 +19,17 @@ export default function Home() {
   });
 
   return (
-    <Container maxWidth="md">
+    <>
+      <Meta
+        title="Gửi mã QR Thần Tốc - MãQR.TOP"
+        description= "Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        keywords="quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code, maqr"
+        ogTitle="Gửi mã QR Thần Tốc - MãQR.TOP"
+        ogDescription="Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        ogImage="/qr-code-animation.gif"
+        ogUrl="https://maqr.top"
+      />
+      <Container maxWidth="md">
       <Box
         sx={{
           display: 'flex',
@@ -104,6 +115,7 @@ export default function Home() {
           </Box>
         </animated.div>
       </Box>
-    </Container>
+      </Container>
+    </>
   );
 }
