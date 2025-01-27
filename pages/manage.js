@@ -133,7 +133,7 @@ export default function Manage() {
                   </Typography>
                   <Typography variant="body1" gutterBottom>
                     <b>Cấu trúc link:</b>{" "}
-                    <code>maqr.top/&lt;username&gt;/&lt;số tiền&gt;</code>
+                    <code>maqr.top/${user.userid}/<b>&lt;số tiền&gt;</b></code>
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 2 }}>
                     <b>Ví dụ:</b>
