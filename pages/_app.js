@@ -1,4 +1,5 @@
 // pages/_app.js
+import { useRouter } from 'next/router';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import '../styles/globals.css'; // Import file CSS global của bạn (nếu có)
