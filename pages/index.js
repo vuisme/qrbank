@@ -37,14 +37,10 @@ export default function Home() {
         />
         <animated.div style={props}>
           <Typography variant="h3" component="h1" gutterBottom>
-            Chào mừng đến với QuickQR!
+            MãQR.TOP!
           </Typography>
           <Typography variant="h5" component="h2" gutterBottom>
-            Tạo mã QR thanh toán ngân hàng nhanh chóng và dễ dàng!
-          </Typography>
-          <Typography variant="body1" paragraph>
-            Dịch vụ của chúng tôi sẽ giúp bạn tạo mã QR cho các giao dịch ngân hàng
-            một cách tiện lợi.
+            Gửi mã QR cực kỳ nhanh chóng và dễ dàng!
           </Typography>
 
           <animated.div style={linkProps}>
