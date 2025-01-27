@@ -10,9 +10,7 @@ import {
   Divider,
   Paper,
 } from '@mui/material';
-import { generateQRCodeData, getQRFromCache } from '../../lib/api';
-
-// Xóa import Redis ở đây
+import { generateQRCodeData } from '../../lib/api';
 
 export default function GenerateQR() {
   const router = useRouter();
@@ -23,8 +21,9 @@ export default function GenerateQR() {
   const [bankName, setBankName] = useState('');
   const [userName, setUserName] = useState('');
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); // Bắt đầu với false
+  const [isLoading, setIsLoading] = useState(false);
   const [bankLogo, setBankLogo] = useState(null);
+  const [numericAmount, setNumericAmount] = useState(0);
 
   // Hàm chuyển đổi chuỗi amount thành số
   const parseAmount = (amountStr) => {
@@ -52,23 +51,8 @@ export default function GenerateQR() {
       setIsLoading(true);
       setError(null);
 
-      // Tạo key cho Redis
-      const redisKey = `${user}:${amount}`;
-
       try {
-        // Thử lấy dữ liệu từ Redis
-        const cachedData = await getQRFromCache(redisKey);
-        if (cachedData) {
-          setQrData(cachedData.qrData);
-          setBankName(cachedData.bankName);
-          setBankLogo(cachedData.bankLogo);
-          setBankAccount(cachedData.bankAccount);
-          setUserName(cachedData.userName);
-          setIsLoading(false);
-          return; // Kết thúc nếu lấy được từ cache
-        }
-
-        // Nếu không có trong cache, fetch từ API
+        // Fetch từ API
         const res = await fetch(`/api/getUserData`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -80,13 +64,40 @@ export default function GenerateQR() {
           setBankAccount(data.bank_account);
           setUserName(data.name);
 
-          const bankInfoRes = await fetch(`/api/banks?bankCode=${data.bank_code}`);
+          const bankInfoRes = await fetch(
+            `/api/banks?bankCode=${data.bank_code}`
+          );
           if (bankInfoRes.ok) {
             const bankInfo = await bankInfoRes.json();
             setBankName(bankInfo.shortName || bankInfo.name);
             setBankLogo(bankInfo.logo);
           } else {
             setError('Failed to fetch bank info.');
+          }
+
+          // Chuyển đổi amount string thành số và tạo QR code ngay sau khi có thông tin user
+          const numAmount = parseAmount(amount);
+          setNumericAmount(numAmount);
+          if (data.bank_account && data.bank_code) {
+            const qrRes = await fetch('/api/qr', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                bankAccount: data.bank_account,
+                bankCode: data.bank_code,
+                amount: numAmount,
+                user,
+                amount: amount, // Thêm amount gốc vào đây để lưu vào cache
+              }),
+            });
+
+            if (qrRes.ok) {
+              const { qr_code_data, ...rest } = await qrRes.json();
+              setQrData(qr_code_data);
+            } else {
+              const errorData = await qrRes.json();
+              setError(errorData.error || 'Failed to generate QR code.');
+            }
           }
         } else {
           setError(data?.error || 'User not found.');
@@ -104,47 +115,6 @@ export default function GenerateQR() {
     }
   }, [user, amount]);
 
-  useEffect(() => {
-    const generateQR = async () => {
-      setIsLoading(true);
-      setError(null);
-      if (bankAccount && bankCode && amount) {
-        // Chuyển đổi amount string thành số
-        const numericAmount = parseAmount(amount);
-
-        try {
-          const res = await fetch('/api/qr', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              bankAccount,
-              bankCode,
-              amount: numericAmount,
-              user,
-              amount,
-            }),
-          });
-
-          if (res.ok) {
-            const { qr_code_data } = await res.json();
-            setQrData(qr_code_data);
-          } else {
-            const errorData = await res.json();
-            setError(errorData.error || 'Failed to generate QR code.');
-          }
-        } catch (error) {
-          console.error(error);
-          setError(error.message || 'Failed to generate QR code.');
-        }
-      }
-      setIsLoading(false);
-    };
-
-    if (bankAccount && bankCode && amount) {
-      generateQR();
-    }
-  }, [bankAccount, bankCode, amount]);
-
   return (
     <Container component="main" maxWidth="xs">
       <Paper elevation={4} sx={{ p: 3, mt: 4, borderRadius: 2 }}>
@@ -155,7 +125,11 @@ export default function GenerateQR() {
             alignItems: 'center',
           }}
         >
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
+          <Typography
+            component="h1"
+            variant="h5"
+            sx={{ fontWeight: 'bold', mb: 2 }}
+          >
             Quét Mã QR Để Thanh Toán
           </Typography>
 
@@ -168,16 +142,21 @@ export default function GenerateQR() {
               width: '100%',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 1,
+              }}
+            >
               {/* Hiển thị logo ngân hàng */}
               {bankLogo ? (
                 <img src={bankLogo} alt={bankName} width={80} />
               ) : isLoading ? (
                 <CircularProgress size={24} />
               ) : (
-                <Typography variant="body1">
-                  &nbsp;
-                </Typography>
+                <Typography variant="body1">&nbsp;</Typography>
               )}
             </Box>
             <Divider sx={{ mb: 2 }} />
@@ -189,7 +168,14 @@ export default function GenerateQR() {
               <Typography>Đang tạo mã QR...</Typography>
             )}
             <Divider sx={{ mt: 2 }} />
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mt: 1,
+              }}
+            >
               <Typography variant="subtitle2" color="textSecondary">
                 Tên chủ TK:
               </Typography>
@@ -197,7 +183,13 @@ export default function GenerateQR() {
                 {userName ? userName.toUpperCase() : ''}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Typography variant="subtitle2" color="textSecondary">
                 Số tài khoản:
               </Typography>
@@ -205,18 +197,32 @@ export default function GenerateQR() {
                 {bankAccount}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Typography variant="subtitle2" color="textSecondary">
                 Số tiền:
               </Typography>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {parseAmount(amount).toLocaleString('vi-VN', {
+                {/* Sử dụng numericAmount ở đây */}
+                {numericAmount.toLocaleString('vi-VN', {
                   style: 'currency',
                   currency: 'VND',
                 })}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mt: 1,
+              }}
+            >
               <Typography variant="caption" color="textSecondary">
                 {bankName && `(${bankName})`}
               </Typography>
