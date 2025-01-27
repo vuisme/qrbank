@@ -10,7 +10,7 @@ import {
   Divider,
   Paper,
 } from '@mui/material';
-import { generateQRCodeData } from '../../lib/api';
+import { generateQRCodeData, getQRFromCache } from '../../lib/api'; // Import getQRFromCache
 
 export default function GenerateQR() {
   const router = useRouter();
@@ -51,8 +51,24 @@ export default function GenerateQR() {
       setIsLoading(true);
       setError(null);
 
+      // Tạo key cho Redis
+      const redisKey = `${user}:${amount}`;
+
       try {
-        // Fetch từ API
+        // Thử lấy dữ liệu từ Redis
+        const cachedData = await getQRFromCache(redisKey);
+        if (cachedData) {
+          setQrData(cachedData.qrData);
+          setBankName(cachedData.bankName);
+          setBankLogo(cachedData.bankLogo);
+          setBankAccount(cachedData.bankAccount);
+          setUserName(cachedData.userName);
+          setNumericAmount(parseAmount(cachedData.amount)); // Sử dụng amount từ cache
+          setIsLoading(false);
+          return; // Kết thúc nếu lấy được từ cache
+        }
+
+        // Nếu không có trong cache, fetch từ API
         const res = await fetch(`/api/getUserData`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -87,12 +103,14 @@ export default function GenerateQR() {
                 bankCode: data.bank_code,
                 amount: numAmount,
                 user,
-                amount: amount, // Thêm amount gốc vào đây để lưu vào cache
+                userName: data.name,
+                bankName: bankInfo.shortName || bankInfo.name,
+                bankLogo: bankInfo.logo,
               }),
             });
 
             if (qrRes.ok) {
-              const { qr_code_data, ...rest } = await qrRes.json();
+              const { qr_code_data } = await qrRes.json();
               setQrData(qr_code_data);
             } else {
               const errorData = await qrRes.json();

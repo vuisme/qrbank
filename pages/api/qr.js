@@ -15,9 +15,21 @@ export default async function handler(req, res) {
       userName,
       bankName,
       bankLogo,
-    } = req.body; // Lấy trực tiếp từ req.body
+    } = req.body;
+
+    // Tạo key cho Redis (user:amount)
+    const redisKey = `${user}:${amount}`;
 
     try {
+      // Kiểm tra cache trước
+      const cachedData = await redis.get(redisKey);
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        res.status(200).json({ qr_code_data: parsedData.qrData });
+        return; // Trả về dữ liệu từ cache
+      }
+
+      // Nếu không có trong cache, tiếp tục tạo QR code
       // Lấy danh sách ngân hàng từ cache để tìm bankBin
       const banks = await getCachedBankList();
       const bank = banks.find((b) => b.bin === bankCode);
@@ -37,19 +49,16 @@ export default async function handler(req, res) {
       // Chuyển đổi QR code text thành data URL của ảnh PNG
       const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
 
-      // Tạo key cho Redis (user:amount)
-      const redisKey = `${user}:${req.body.amount}`;
-
       // Lưu thông tin vào Redis với thời hạn 1 ngày (86400 giây)
       await redis.set(
         redisKey,
         JSON.stringify({
           qrData: qrCodeBase64,
-          bankName: bankName, // Lấy từ req.body
-          bankLogo: bankLogo, // Lấy từ req.body
-          userName: userName, // Lấy từ req.body
+          bankName: bankName,
+          bankLogo: bankLogo,
+          userName: userName,
           bankAccount: bankAccount,
-          amount: req.body.amount,
+          amount: amount,
         }),
         'EX',
         86400
