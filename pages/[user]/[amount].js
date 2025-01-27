@@ -53,7 +53,7 @@ export default function GenerateQR() {
       setError(null);
 
       // Tạo key cho Redis
-      const redisKey = `<span class="math-inline">\{user\}\:</span>{amount}`;
+      const redisKey = `${user}:${amount}`;
 
       try {
         // Thử lấy dữ liệu từ Redis
