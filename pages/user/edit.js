@@ -14,6 +14,7 @@ import {
   Avatar,
 } from '@mui/material';
 import UserLayout from '../../components/UserLayout';
+import Meta from '../components/Meta';
 
 export default function EditUser() {
   const [bankCode, setBankCode] = useState(''); // Sử dụng bankCode thay thế
@@ -148,6 +149,15 @@ export default function EditUser() {
 
   return (
     <UserLayout>
+      <Meta
+        title="Cập nhật thông tin tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
+        description= "Cập nhật thông tin Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        keywords="quản lý, manage, quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code, maqr"
+        ogTitle="C ập nhật thông tin tài khoản Gửi mã QR Thần Tốc - MãQR.TOP"
+        ogDescription="Trang cập nhật thông tin Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        ogImage="/qr-code-animation.gif"
+        ogUrl="https://maqr.top/user/edit"
+      />
       <Container component="main" maxWidth="xs">
         <Box
           sx={{
