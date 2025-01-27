@@ -11,9 +11,8 @@ import {
   Paper,
 } from '@mui/material';
 import { generateQRCodeData, getQRFromCache } from '../../lib/api';
-import Redis from 'ioredis';
 
-const redis = new Redis(process.env.REDIS_URL);
+// Xóa import Redis ở đây
 
 export default function GenerateQR() {
   const router = useRouter();
@@ -24,7 +23,7 @@ export default function GenerateQR() {
   const [bankName, setBankName] = useState('');
   const [userName, setUserName] = useState('');
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Bắt đầu với false
   const [bankLogo, setBankLogo] = useState(null);
 
   // Hàm chuyển đổi chuỗi amount thành số
@@ -54,7 +53,7 @@ export default function GenerateQR() {
       setError(null);
 
       // Tạo key cho Redis
-      const redisKey = `${user}:${amount}`;
+      const redisKey = `<span class="math-inline">\{user\}\:</span>{amount}`;
 
       try {
         // Thử lấy dữ liệu từ Redis
@@ -109,13 +108,10 @@ export default function GenerateQR() {
     const generateQR = async () => {
       setIsLoading(true);
       setError(null);
-
-      // Tạo key cho Redis (ở đây, vì đã có lượng thông tin amount truyền vào làm key cache)
-      const redisKey = `${user}:${amount}`;
-
       if (bankAccount && bankCode && amount) {
         // Chuyển đổi amount string thành số
         const numericAmount = parseAmount(amount);
+
         try {
           const res = await fetch('/api/qr', {
             method: 'POST',
@@ -131,22 +127,6 @@ export default function GenerateQR() {
 
           if (res.ok) {
             const { qr_code_data } = await res.json();
-
-            // Cập nhật cache Redis
-            await redis.set(
-              redisKey,
-              JSON.stringify({
-                qrData: qr_code_data,
-                bankName,
-                bankLogo,
-                bankAccount,
-                userName,
-                amount: numericAmount,
-              }),
-              'EX',
-              86400
-            ); // Hết hạn sau 1 ngày
-
             setQrData(qr_code_data);
           } else {
             const errorData = await res.json();

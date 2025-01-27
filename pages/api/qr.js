@@ -7,7 +7,7 @@ const redis = new Redis(process.env.REDIS_URL);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { bankAccount, bankCode, amount, user, amount: amountStr } = req.body;
+    const { bankAccount, bankCode, amount, user } = req.body;
 
     try {
       // Lấy danh sách ngân hàng từ cache để tìm bankBin
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       const qrCodeData = await generateQRCodeData({
         bankBin: bank.bin,
         bankNumber: bankAccount,
-        amount,
+        amount: amount,
         purpose: 'Thanh toan QR',
       });
 
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       const qrCodeBase64 = await QRCode.toDataURL(qrCodeData);
 
       // Tạo key cho Redis (user:amount)
-      const redisKey = `${user}:${amountStr}`;
+      const redisKey = `<span class="math-inline">\{user\}\:</span>{amount}`;
 
       // Lưu dữ liệu vào Redis với thời hạn 1 ngày (86400 giây)
       await redis.set(
