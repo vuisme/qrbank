@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   Avatar,
+  Link as MUILink
 } from '@mui/material';
 import UserLayout from '../../components/UserLayout';
 import Meta from '../../components/Meta';
@@ -51,7 +52,9 @@ export default function EditUser() {
           if (banksResponse.ok) {
             const banksData = await banksResponse.json();
             setBanks(banksData);
-            const foundBank = banksData.find(bank => bank.bin === data.bank_code);
+            const foundBank = banksData.find(
+              (bank) => bank.bin === data.bank_code
+            );
             setSelectedBank(foundBank);
           } else {
             setError('Failed to fetch banks.');
@@ -111,7 +114,9 @@ export default function EditUser() {
     // Regex mật khẩu (ít nhất 8 ký tự, có chữ và số)
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     if (password && !passwordRegex.test(password)) {
-      setError('Password must be at least 8 characters and include both letters and numbers.');
+      setError(
+        'Password must be at least 8 characters and include both letters and numbers.'
+      );
       return;
     }
 
@@ -151,9 +156,9 @@ export default function EditUser() {
     <UserLayout>
       <Meta
         title="Cập nhật thông tin tài khoản gửi mã QR Thần Tốc - MãQR.TOP"
-        description= "Cập nhật thông tin Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
+        description="Cập nhật thông tin Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
         keywords="quản lý, manage, quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code, maqr"
-        ogTitle="C ập nhật thông tin tài khoản Gửi mã QR Thần Tốc - MãQR.TOP"
+        ogTitle="Cập nhật thông tin tài khoản Gửi mã QR Thần Tốc - MãQR.TOP"
         ogDescription="Trang cập nhật thông tin Công cụ Tạo và Gửi mã QR với số tiền tùy chọn cực kỳ nhanh chóng"
         ogImage="/qr-code-animation.gif"
         ogUrl="https://maqr.top/user/edit"
@@ -197,14 +202,17 @@ export default function EditUser() {
                   alt={selectedBank.name}
                   sx={{ width: 40, height: 40, mr: 2 }}
                 />
-                <Typography>{selectedBank.shortName || selectedBank.name}</Typography>
+                <Typography>
+                  {selectedBank.shortName || selectedBank.name}
+                </Typography>
               </Box>
             )}
 
             {/* Thông báo nếu đã có bank_code và bank_account */}
             {bankCode && bankAccount && (
               <Alert severity="info" sx={{ mt: 2 }}>
-                Liên hệ với admin để thay đổi thông tin ngân hàng vì lý do bảo mật.
+                Liên hệ với admin để thay đổi thông tin ngân hàng vì lý do bảo
+                mật.
               </Alert>
             )}
 
@@ -249,9 +257,23 @@ export default function EditUser() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-              Update Information
-            </Button>
+            <Box sx={{mt: 2, display: 'flex', justifyContent: 'space-between'}}>
+                <Button
+                type="submit"
+                variant="contained"
+                sx={{  }}
+                >
+                Update Information
+                </Button>
+                <Button
+                variant="contained"
+                color="error"
+                onClick={() => router.push('/manage')}
+                sx={{  }}
+                >
+                Hủy
+                </Button>
+            </Box>
           </Box>
         </Box>
       </Container>
