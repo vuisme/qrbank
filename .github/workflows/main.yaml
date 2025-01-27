@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_IMAGE: cpanel10x/maqr # Thay đổi repository name
+  REGISTRY_IMAGE: cpanel10x/myqr
 
 jobs:
   build:
@@ -67,15 +67,18 @@ jobs:
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
-          echo "$digest"
+          echo "Digest: $digest"
+          echo "Platform: ${{ matrix.platform }}"
           echo "$digest" | cut -d ':' -f 2 > "/tmp/digests/${{ matrix.platform }}"
+          echo "Digest file content:"
+          cat "/tmp/digests/${{ matrix.platform }}"
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ matrix.platform }}
           path: /tmp/digests/*
-          if-no-files-found: error
+          if-no-files-found: warn # Changed to warn for debugging
           retention-days: 1
 
   merge:
@@ -89,7 +92,7 @@ jobs:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -113,7 +116,7 @@ jobs:
 
       - name: Create manifest list and push
         run: |
-          # Create a new array to hold our formatted strings
+          # Create a new array to hold formatted strings
           formatted_digests=()
 
           # Loop through each file in the directory
@@ -137,3 +140,17 @@ jobs:
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}
+
+  deploy-dev:
+    runs-on: ubuntu-latest
+    needs:
+      - merge
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: docker ps
