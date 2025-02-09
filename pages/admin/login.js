@@ -23,22 +23,27 @@ export default function AdminLogin() {
   }, [router]);
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+        event.preventDefault();
 
-    const response = await fetch('/api/admin/login', { // Sửa lại api route
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
+        const response = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
 
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem('tokenAdmin', data.token);
-      router.push('/admin');
-    } else {
-      const data = await response.json();
-      setError(data.error || 'Invalid username or password');
-    }
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('tokenAdmin', data.token);
+            router.push('/admin');
+        } else {
+            const data = await response.json();
+            // Cải thiện thông báo lỗi để người dùng biết nếu bị chặn hoặc giới hạn tần suất
+            if (response.status === 429) {
+                setError(data.error || 'Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau.');
+            } else {
+                setError(data.error || 'Tên đăng nhập hoặc mật khẩu không hợp lệ');
+            }
+        }
   };
 
   return (
