@@ -1,10 +1,10 @@
-name: Build and Push to Docker Hub
+name: Build And Push
 
 on:
   workflow_dispatch:
 
 env:
-  REGISTRY_IMAGE: cpanel10x/maqr # Replace with your Docker Hub username and repo name
+  REGISTRY_IMAGE: cpanel10x/maqr
 
 jobs:
   build:
@@ -14,21 +14,21 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          - linux/arm64
+          - linux/arm64  # Giữ lại arm64 nếu bạn cần
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Next.js app
-        run: npm run build
+          images: ${{ env.REGISTRY_IMAGE }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -42,46 +42,28 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY_IMAGE }}
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
-
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
+          context: .
+          file: ./Dockerfile  # Đảm bảo đường dẫn đúng đến Dockerfile
           platforms: ${{ matrix.platform }}
-          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          push: true
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
         run: |
-          # **Unconditionally create /tmp/digests directory**
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
-          echo "Digest: $digest"
-          echo "Platform: ${{ matrix.platform }}"
-          # **Now write to the file**
-          echo "$digest" | cut -d ':' -f 2 > "/tmp/digests/${{ matrix.platform }}.txt"
-          echo "Digest file content:"
-          cat "/tmp/digests/${{ matrix.platform }}.txt"
+          touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          # **Include the platform in the artifact name**
-          name: digests-${{ matrix.platform }}
-          path: /tmp/digests/${{ matrix.platform }}.txt  # **Only upload the specific platform's file**
-          if-no-files-found: error # We now expect a file for each platform
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
           retention-days: 1
 
   merge:
@@ -90,10 +72,10 @@ jobs:
       - build
     steps:
       - name: Download digests
-        uses: actions/actions/download-artifact@v4
+        uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
-          # **Don't use pattern, download-artifact handles merging**
+          pattern: digests-*
           merge-multiple: true
 
       - name: Set up Docker Buildx
@@ -104,12 +86,6 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY_IMAGE }}
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -118,28 +94,31 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create manifest list and push
+        working-directory: /tmp/digests
         run: |
-          # Create a new array to hold our formatted strings
-          formatted_digests=()
-
-          # Loop through each file in the directory
-          for file in /tmp/digests/*; do
-            # Extract the platform from the filename (now simpler)
-            platform=$(basename "$file" | cut -d '.' -f 1)
-
-            # Read the digest from the file
-            digest=$(cat "$file")
-
-            # Format the string and add it to the array
-            formatted_digests+=("${{ env.REGISTRY_IMAGE }}@sha256:${digest}")
-          done
-
-          # Join the array elements with a space and echo the result
-          IFS=' '
-          result="${formatted_digests[*]}"
-          echo "Result: $result"
-          docker buildx imagetools create $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' ' | sed 's/ /,/g') $result
+          DOCKER_METADATA_OUTPUT_JSON=$(echo '${{ toJSON(steps.meta.outputs) }}' | jq -r '.json')
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+
+  deploy-dev:
+    runs-on: ubuntu-latest
+    needs:
+      - merge
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            docker pull ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+            docker stop tbapi || true
+            docker rm tbapi || true
+            docker run -d -p 3000:3000 --name tbapi ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+            docker ps
