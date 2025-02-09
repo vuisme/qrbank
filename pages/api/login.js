@@ -12,7 +12,7 @@ const BLOCK_DURATION = 86400; // 24 giờ (giây)
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { userid, password, recaptchaToken } = req.body; // Lấy recaptchaToken
+        const { userid, password } = req.body; // **Không còn lấy recaptchaToken nữa**
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
         // **Bước 1: Kiểm tra giới hạn tần suất và chặn IP (chống brute-force)**
@@ -24,18 +24,9 @@ export default async function handler(req, res) {
         }
 
         try {
-            // **Bước 2: Xác thực reCAPTCHA TOKEN ở BACKEND** - **ĐÂY LÀ ĐIỀU QUAN TRỌNG**
-            if (!recaptchaToken) {
-                recordFailedAttempt(ip); // Ghi lại lần thử thất bại do thiếu reCAPTCHA
-                return res.status(400).json({ error: 'Vui lòng hoàn thành xác minh reCAPTCHA.' });
-            }
-            const recaptchaResult = await verifyRecaptcha(recaptchaToken);
-            if (!recaptchaResult.success) {
-                recordFailedAttempt(ip); // Ghi lại lần thử thất bại do reCAPTCHA fail
-                return res.status(400).json({ error: 'Xác minh reCAPTCHA không thành công. Vui lòng thử lại.' });
-            }
+            // **Bước 2: KHÔNG CÒN XÁC THỰC reCAPTCHA Ở BACKEND NỮA**
 
-            // **Bước 3: Xác thực User ID và mật khẩu (nếu reCAPTCHA THÀNH CÔNG)**
+            // **Bước 3: Xác thực User ID và mật khẩu**
             const results = await query({
                 query: 'SELECT * FROM members WHERE userid = $1',
                 values: [userid],
@@ -50,14 +41,14 @@ export default async function handler(req, res) {
                         process.env.JWT_SECRET,
                         { expiresIn: '1h' }
                     );
-                    await clearFailedAttempts(ip); // Đăng nhập thành công, reset failed attempts
+                    await clearFailedAttempts(ip);
                     return res.status(200).json({ token });
                 } else {
-                    recordFailedAttempt(ip); // Ghi lại lần thử sai mật khẩu
+                    await recordFailedAttempt(ip);
                     return res.status(401).json({ error: 'Sai mật khẩu' });
                 }
             } else {
-                recordFailedAttempt(ip); // Ghi lại lần thử không tìm thấy User ID
+                await recordFailedAttempt(ip);
                 return res.status(404).json({ error: 'Không tìm thấy User ID' });
             }
         } catch (error) {
@@ -102,13 +93,12 @@ async function clearFailedAttempts(ip) {
     await redis.del(`member_block:${ip}`);
 }
 
+// **Hàm verifyRecaptcha ĐÃ BỊ LOẠI BỎ HOÀN TOÀN**
+// async function verifyRecaptcha(token) {
+//     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+//     const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`;
 
-// **Hàm xác thực reCAPTCHA - ĐẢM BẢO CÓ HÀM NÀY**
-async function verifyRecaptcha(token) {
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY; // Biến môi trường cho secret key
-    const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`;
-
-    const response = await fetch(verificationUrl, { method: 'POST' });
-    const result = await response.json();
-    return result;
-}
+//     const response = await fetch(verificationUrl, { method: 'POST' });
+//     const result = await response.json();
+//     return result;
+// }

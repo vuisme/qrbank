@@ -8,10 +8,10 @@ import {
   Box,
   Alert,
 } from '@mui/material';
-import withReCAPTCHA from '../components/withReCAPTCHA'; // Đảm bảo import HOC
+import withReCAPTCHA from '../components/withReCAPTCHA';
 import Meta from '../components/Meta';
 
-function Login({ recaptchaToken }) { // **Đảm bảo nhận prop recaptchaToken**
+function Login({ recaptchaToken }) {
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,7 +28,7 @@ function Login({ recaptchaToken }) { // **Đảm bảo nhận prop recaptchaToke
       body: JSON.stringify({
         userid,
         password,
-        recaptchaToken, // **Đảm bảo truyền recaptchaToken**
+        recaptchaToken, // **Vẫn gửi recaptchaToken từ frontend (không bắt buộc, có thể bỏ qua)**
       }),
     });
 
@@ -38,11 +38,10 @@ function Login({ recaptchaToken }) { // **Đảm bảo nhận prop recaptchaToke
       router.push(redirect || '/manage');
     } else {
       const data = await response.json();
+      // **Đơn giản hóa xử lý lỗi, không cần kiểm tra lỗi reCAPTCHA nữa**
       if (response.status === 429) {
         setError(data.error || 'Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau.');
-      } else if (response.status === 400 && data.error?.includes('reCAPTCHA')) { // Xử lý lỗi reCAPTCHA riêng
-        setError(data.error || 'Xác minh reCAPTCHA không thành công. Vui lòng thử lại.');
-      }
+      }
        else {
         setError(data.error || 'User ID hoặc mật khẩu không hợp lệ');
       }
@@ -106,4 +105,4 @@ function Login({ recaptchaToken }) { // **Đảm bảo nhận prop recaptchaToke
   );
 }
 
-export default withReCAPTCHA(Login, 'login'); // **Đảm bảo vẫn bọc component với HOC**
+export default withReCAPTCHA(Login, 'login'); // Vẫn giữ lại HOC ở frontend để hiển thị reCAPTCHA
