@@ -127,11 +127,11 @@ export default function Home() {
                                             </TableCell>
                                             <TableCell align="left">
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Lưu lịch sử giao dịch</Typography>
-                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Xác thực nhận tiền</Typography>
-                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>API tích hợp</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Xác thực giao dịch tự dộng</Typography>
                                             </TableCell>
                                             <TableCell align="left">
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Self-Host</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>API tích hợp</Typography>
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Tùy biến tên miền</Typography>
                                                 {/* Bạn có thể thêm các tính năng khác cho doanh nghiệp/self-host ở đây */}
                                             </TableCell>
@@ -154,7 +154,7 @@ export default function Home() {
                                 Hãy liên hệ với chúng tôi để được tư vấn và hỗ trợ:
                             </Typography>
                             <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                                Email: <Link href="mailto:your-email@example.com" passHref><Typography variant="inherit" color="primary">your-email@example.com</Typography></Link>
+                                Email: <Link href="mailto:me@cvutn.net" passHref><Typography variant="inherit" color="primary">me@vutn.net</Typography></Link>
                             </Typography>
                             {/* You can add other contact methods here, like phone number, contact form link, etc. */}
                         </Box>
