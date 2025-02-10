@@ -16,7 +16,7 @@ import Head from 'next/head';
 
 export default function GenerateQR() {
     const router = useRouter();
-    const { user, amount } = router.query;
+    const { user, amount, slug } = router.query; // Lấy thêm 'slug' từ router.query
     const [qrData, setQrData] = useState(null);
     const [bankCode, setBankCode] = useState('');
     const [bankAccount, setBankAccount] = useState('');
@@ -25,6 +25,7 @@ export default function GenerateQR() {
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [bankLogo, setBankLogo] = useState(null);
+    const [purpose, setPurpose] = useState(''); // State mới cho purpose
 
     // Hàm xử lý chuỗi amount (thay thế k, m)
     const formatAmountString = (amountStr) => {
@@ -47,111 +48,113 @@ export default function GenerateQR() {
     };
 
     useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            setError(null);
-
-            // Xử lý amount trước khi tạo key cho Redis
-            // **Kiểm tra nếu amount không có, gán giá trị mặc định "0"**
-            const currentAmount = amount || "0"; // Gán "0" nếu amount là falsy (undefined, null, '')
-            const formattedAmount = formatAmountString(currentAmount);
-            const redisKey = `<span class="math-inline">\{user\}\:</span>{formattedAmount}`; // Sử dụng formattedAmount
-
-            try {
-                // Thử lấy dữ liệu từ Redis
-                const cachedData = await getCachedQRData(redisKey);
-                if (cachedData) {
-                    setQrData(cachedData.qrData);
-                    setBankName(cachedData.bankName);
-                    setBankLogo(cachedData.bankLogo);
-                    setBankAccount(cachedData.bankAccount);
-                    setUserName(cachedData.userName);
-                    setIsLoading(false);
-                    return; // Kết thúc nếu lấy được từ cache
-                }
-
-                // Nếu không có trong cache, fetch từ API
-                const res = await fetch(`/api/getUserData`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user: user }),
-                });
-                const data = await res.json();
-                if (res.ok && data) {
-                    setBankCode(data.bank_code);
-                    setBankAccount(data.bank_account);
-                    setUserName(data.name);
-
-                    let bankInfo = { shortName: '', name: '', logo: '' };
-
-                    const bankInfoRes = await fetch(
-                        `/api/banks?bankCode=${data.bank_code}`
-                    );
-                    if (bankInfoRes.ok) {
-                        bankInfo = await bankInfoRes.json();
-                        setBankName(bankInfo.shortName || bankInfo.name);
-                        setBankLogo(bankInfo.logo);
-                    } else {
-                        setError('Failed to fetch bank info.');
-                    }
-
-                    if (data.bank_account && data.bank_code) {
-                        const qrRes = await fetch('/api/qr', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                bankAccount: data.bank_account,
-                                bankCode: data.bank_code,
-                                amount: formattedAmount, // Truyền formattedAmount (có thể là "0")
-                                user,
-                                userName: data.name,
-                                bankName: bankInfo.shortName || bankInfo.name,
-                                bankLogo: bankInfo.logo,
-                            }),
-                        });
-
-                        if (qrRes.ok) {
-                            const { qr_code_data } = await qrRes.json();
-                            setQrData(qr_code_data);
-                            if (typeof window !== 'undefined' && window.gtag) {
-                                window.gtag("event", "generate_qr_success", {
-                                    event_category: "QR Code",
-                                    event_label: "QR Code Generated",
-                                    value: currentAmount, // Sử dụng currentAmount để ghi log (có thể là "0")
-                                });
-                            }
-                        } else {
-                            const errorData = await qrRes.json();
-                            setError(errorData.error || 'Failed to generate QR code.');
-                        }
-                    }
-                } else {
-                    setError(data?.error || 'User not found.');
-                }
-            } catch (error) {
-                console.error(error);
-                setError('Failed to load data.');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        if (user) { // Chỉ cần kiểm tra user, amount có thể là undefined hoặc có giá trị mặc định
-            fetchData();
-        }
-    }, [user, amount]); // amount không còn là điều kiện bắt buộc
+      const fetchData = async () => {
+          setIsLoading(true);
+          setError(null);
+  
+          const currentAmount = amount || "0";
+          const formattedAmount = formatAmountString(currentAmount);
+          const redisKey = `${user}:${formattedAmount}:${slug || ''}`;
+  
+          // **Xử lý purpose từ slug (nếu có), gán mặc định "Chuyen tien QR" nếu không có**
+          let currentPurpose = 'Chuyen tien QR'; // **Giá trị mặc định là "Chuyen tien QR"**
+          if (slug) {
+              currentPurpose = decodeURIComponent(slug).replace(/_/g, ' ');
+              setPurpose(currentPurpose);
+          } else {
+              setPurpose('Chuyen tien QR'); // **Set state purpose mặc định khi không có slug**
+          }
+  
+          try {
+              // Thử lấy dữ liệu từ Redis
+              const cachedData = await getCachedQRData(redisKey);
+              if (cachedData) {
+                  setQrData(cachedData.qrData);
+                  setBankName(cachedData.bankName);
+                  setBankLogo(cachedData.bankLogo);
+                  setBankAccount(cachedData.bankAccount);
+                  setUserName(cachedData.userName);
+                  setPurpose(cachedData.purpose || 'Chuyen tien QR'); // Lấy purpose từ cache hoặc mặc định
+                  setIsLoading(false);
+                  return; // Kết thúc nếu lấy được từ cache
+              }
+  
+              // Nếu không có trong cache, fetch từ API
+              const res = await fetch(`/api/getUserData`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ user: user }),
+              });
+              const data = await res.json();
+              if (res.ok && data) {
+                  setBankCode(data.bank_code);
+                  setBankAccount(data.bank_account);
+                  setUserName(data.name);
+  
+                  let bankInfo = { shortName: '', name: '', logo: '' };
+  
+                  const bankInfoRes = await fetch(
+                      `/api/banks?bankCode=${data.bank_code}`
+                  );
+                  if (bankInfoRes.ok) {
+                      bankInfo = await bankInfoRes.json();
+                      setBankName(bankInfo.shortName || bankInfo.name);
+                      setBankLogo(bankInfo.logo);
+                  } else {
+                      setError('Failed to fetch bank info.');
+                  }
+  
+                  if (data.bank_account && data.bank_code) {
+                      const qrRes = await fetch('/api/qr', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                              bankAccount: data.bank_account,
+                              bankCode: data.bank_code,
+                              amount: formattedAmount,
+                              user,
+                              userName: data.name,
+                              bankName: bankInfo.shortName || bankInfo.name,
+                              bankLogo: bankInfo.logo,
+                              purpose: currentPurpose, // Truyền purpose vào API (sẽ là "Chuyen tien QR" nếu không có slug)
+                          }),
+                      });
+  
+                      if (qrRes.ok) {
+                          const { qr_code_data } = await qrRes.json();
+                          setQrData(qr_code_data);
+                          // ... (gtag event) ...
+                      } else {
+                          const errorData = await qrRes.json();
+                          setError(errorData.error || 'Failed to generate QR code.');
+                      }
+                  }
+              } else {
+                  setError(data?.error || 'User not found.');
+              }
+          } catch (error) {
+              console.error(error);
+              setError('Failed to load data.');
+          } finally {
+              setIsLoading(false);
+          }
+      };
+  
+      if (user) {
+          fetchData();
+      }
+  }, [user, amount, slug]);
 
     return (
         <>
             <Head>
                 <title>Quét mã QR để thanh toán - {userName ? userName : 'MaQR.TOP'}</title>
-                <meta name="description" content={`Quét mã QR để thanh toán cho ${userName ? userName : 'người dùng'} với số tiền ${amount ? formatAmountDisplay(amount) : ''} qua ngân hàng ${bankName ? bankName : ''}`} />
+                <meta name="description" content={`Quét mã QR để thanh toán cho ${userName ? userName : 'người dùng'} với số tiền ${amount ? formatAmountDisplay(amount) : ''}${purpose ? ` với nội dung: ${purpose}` : ''} qua ngân hàng ${bankName ? bankName : ''}`} />
                 <meta name="keywords" content="quét mã qr, thanh toán, vietqr, ngân hàng, chuyển tiền, qr code, maqr.top" />
                 <meta property="og:title" content={`Quét mã QR để thanh toán - ${user ? user : 'MaQR.TOP'}`} />
-                <meta property="og:image" content={bankLogo || '/qr-code-animation.gif'} /> {/* Thay đường dẫn ảnh */}
-                <meta property="og:description" content={`Quét mã QR để thanh toán cho ${userName ? userName : 'người dùng'} với số tiền ${amount ? formatAmountDisplay(amount) : ''} qua ngân hàng ${bankName ? bankName : ''}`} />
+                <meta property="og:image" content={bankLogo || '/qr-code-animation.gif'} />
+                <meta property="og:description" content={`Quét mã QR để thanh toán cho ${userName ? userName : 'người dùng'} với số tiền ${amount ? formatAmountDisplay(amount) : ''}${purpose ? ` với nội dung: ${purpose}` : ''} qua ngân hàng ${bankName ? bankName : ''}`} />
                 <meta property="og:type" content="website" />
-                {/* Thêm các thẻ meta khác nếu cần */}
             </Head>
             <Container component="main" maxWidth="xs">
                 <Paper elevation={4} sx={{ p: 3, mt: 4, borderRadius: 2 }}>
@@ -245,10 +248,24 @@ export default function GenerateQR() {
                                     Số tiền:
                                 </Typography>
                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                    {/* Hiển thị số tiền đã format hoặc thông báo "Tùy chọn" */}
-                                    {amount ? formatAmountDisplay(amount) : "Tùy chọn"}
+                                    {formatAmountDisplay(amount)}
                                 </Typography>
                             </Box>
+                            {/* Hiển thị purpose nếu có */}
+                            {purpose && (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        mt: 1,
+                                    }}
+                                >
+                                    <Typography variant="caption" color="textSecondary" align="center">
+                                        {purpose}
+                                    </Typography>
+                                </Box>
+                            )}
                             <Box
                                 sx={{
                                     display: 'flex',
