@@ -9,14 +9,14 @@ export default function Home() {
         opacity: 1,
         from: { opacity: 0 },
         delay: 500,
-        });
+    });
 
     const linkProps = useSpring({
         opacity: 1,
         from: { opacity: 0 },
         delay: 1000,
         config: { tension: 200, friction: 20 },
-        });
+    });
 
     return (
         <>
@@ -95,33 +95,60 @@ export default function Home() {
                             </Box>
                         </animated.div>
 
-                        {/* **Feature Table Section** */}
+                        {/* **Bảng CÁC CẤP ĐỘ SỬ DỤNG** */}
                         <Box sx={{ mt: 6, width: '100%' }}>
-                            <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'left' }}>
-                                Tính năng Miễn phí
+                            <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+                                CÁC CẤP ĐỘ SỬ DỤNG
                             </Typography>
                             <TableContainer component={Paper} elevation={2}>
-                                <Table aria-label="feature table">
+                                <Table aria-label="feature table" sx={{ minWidth: 650 }}>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell sx={{ fontWeight: 'bold' }}>Tính năng</TableCell>
-                                            <TableCell sx={{ fontWeight: 'bold' }}>Mô tả</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>PUBLIC ACCESS</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>REGISTERED</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>VERIFIED COMPANY</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>SELF-HOSTED</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell component="th" scope="row">Tạo mã QR VietQR</TableCell>
-                                            <TableCell>Tạo mã QR thanh toán nhanh chóng, dễ dàng chia sẻ.</TableCell>
+                                            <TableCell align="center" sx={{ fontStyle: 'italic', color: 'textSecondary' }}>Sử dụng ngay các API của VietQRic mà <br/> không cần đăng kí</TableCell>
+                                            <TableCell align="center" sx={{ fontStyle: 'italic', color: 'textSecondary' }}>Đăng kí tài khoản để sử dụng các API <br/> một cách cá nhân hóa, nhiều tùy biến</TableCell>
+                                            <TableCell align="center" sx={{ fontStyle: 'italic', color: 'textSecondary' }}>Các tính năng đặc thù dành riêng cho <br/> doanh nghiệp</TableCell>
+                                            <TableCell align="center" sx={{ fontStyle: 'italic', color: 'textSecondary' }}>Các doanh nghiệp lớn làm chủ công <br/> nghệ cổng thanh toán ở mức độ cao nhất.</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell component="th" scope="row">Số tiền tùy chọn</TableCell>
-                                            <TableCell>Hỗ trợ tạo mã QR với số tiền tùy chọn hoặc không cố định.</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'success.main', fontSize: '1.2rem' }}>MIỄN PHÍ</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'success.main', fontSize: '1.2rem' }}>MIỄN PHÍ</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>LIÊN HỆ</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>LIÊN HỆ</TableCell>
                                         </TableRow>
                                         <TableRow>
-                                            <TableCell component="th" scope="row">Không giới hạn số lượng</TableCell>
-                                            <TableCell>Tạo bao nhiêu mã QR tùy thích, hoàn toàn miễn phí.</TableCell>
+                                            <TableCell align="left">
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Bank Database</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Quicklink</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Deeplink</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>SLA 99.5%</Typography>
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Bao gồm tất cả tính năng của Public Access và</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>My VietQR</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Integration</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Account Number Lookup</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>SLA 99.9%</Typography>
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Bao gồm tất cả tính năng của Registered và</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Custom Domain</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Payment Initialize</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Counter Account Enrich</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>&checkmark;</span> SLA 99.95%</Typography>
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Bao gồm tất cả tính năng của Verified Company và</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Self-Host</Typography>
+                                            </TableCell>
                                         </TableRow>
-                                        {/* Add more free features here */}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
@@ -139,11 +166,10 @@ export default function Home() {
                                 Hãy liên hệ với chúng tôi để được tư vấn và hỗ trợ:
                             </Typography>
                             <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                                Email: <Link href="mailto:me@vutn.net" passHref><Typography variant="inherit" color="primary">me@vutn.net</Typography></Link>
+                                Email: <Link href="mailto:your-email@example.com" passHref><Typography variant="inherit" color="primary">your-email@example.com</Typography></Link>
                             </Typography>
                             {/* You can add other contact methods here, like phone number, contact form link, etc. */}
                         </Box>
-
 
                         <Box sx={{ mt: 4 }}>
                             <Grid container spacing={2} justifyContent="center">
