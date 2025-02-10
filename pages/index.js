@@ -9,14 +9,14 @@ export default function Home() {
         opacity: 1,
         from: { opacity: 0 },
         delay: 500,
-        });
+    });
 
     const linkProps = useSpring({
         opacity: 1,
         from: { opacity: 0 },
         delay: 1000,
         config: { tension: 200, friction: 20 },
-        });
+    });
 
     return (
         <>
@@ -142,7 +142,7 @@ export default function Home() {
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Custom Domain</Typography>
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Payment Initialize</Typography>
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Counter Account Enrich</Typography>
-                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✓ SLA 99.95%</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>&checkmark;</span> SLA 99.95%</Typography>
                                             </TableCell>
                                             <TableCell align="left">
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Bao gồm tất cả tính năng của Verified Company và</Typography>
@@ -153,7 +153,6 @@ export default function Home() {
                                 </Table>
                             </TableContainer>
                         </Box>
-
 
                         {/* **Self-Hosting Contact Section** */}
                         <Box sx={{ mt: 6, width: '100%', textAlign: 'left' }}>
@@ -171,7 +170,6 @@ export default function Home() {
                             </Typography>
                             {/* You can add other contact methods here, like phone number, contact form link, etc. */}
                         </Box>
-
 
                         <Box sx={{ mt: 4 }}>
                             <Grid container spacing={2} justifyContent="center">
