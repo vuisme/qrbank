@@ -53,7 +53,24 @@ export default function Home() {
                         <Typography variant="h5" component="h2" gutterBottom>
                             Gửi mã QR cực kỳ nhanh chóng và dễ dàng!
                         </Typography>
-
+                        <Box sx={{ mt: 4 }}>
+                            <Grid container spacing={2} justifyContent="center">
+                                <Grid item>
+                                    <Link href="/login" passHref>
+                                        <Button variant="contained" color="primary" size="large">
+                                            Đăng nhập
+                                        </Button>
+                                    </Link>
+                                </Grid>
+                                <Grid item>
+                                    <Link href="/register" passHref>
+                                        <Button variant="outlined" color="primary" size="large">
+                                            Đăng ký
+                                        </Button>
+                                    </Link>
+                                </Grid>
+                            </Grid>
+                        </Box>
                         <animated.div style={linkProps}>
                             <Box
                                 sx={{
@@ -90,7 +107,7 @@ export default function Home() {
                                     </Typography>
                                 </Typography>
                                 <Typography variant="body1" component="p" sx={{ mt: 2 }}>
-                                    Trong đó, <Typography variant="inherit" component='span' sx={{color: '#0d6efd', fontWeight: 'bold'}}>&lt;user&gt;</Typography> là tên người dùng của bạn và <Typography variant="inherit" component='span' sx={{color: '#dc3545', fontWeight: 'bold'}}>&lt;số tiền&gt;</Typography> là số tiền cần thanh toán. Hệ thống sẽ tự động tạo mã QR tương ứng để khách hàng của bạn có thể quét và thanh toán nhanh chóng.
+                                    Trong đó, <Typography variant="inherit" component='span' sx={{color: '#0d6efd', fontWeight: 'bold'}}>&lt;user&gt;</Typography> là tên người dùng của bạn và <Typography variant="inherit" component='span' sx={{color: '#dc3545', fontWeight: 'bold'}}>&lt;số tiền&gt;</Typography> là số tiền cần thanh toán. Hệ thống sẽ tự động tạo mã QR tương ứng khi khách hàng truy cập liên kết và có thể quét mã thanh toán nhanh chóng.
                                 </Typography>
                             </Box>
                         </animated.div>
@@ -98,7 +115,7 @@ export default function Home() {
                         {/* **Bảng CÁC CẤP ĐỘ SỬ DỤNG - 3 Cột** */}
                         <Box sx={{ mt: 6, width: '100%' }}>
                             <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
-                                CÁC CẤP ĐỘ SỬ DỤNG
+                                Các Gói Dịch Vụ
                             </Typography>
                             <TableContainer component={Paper} elevation={2}>
                                 <Table aria-label="feature table" sx={{ minWidth: 650 }}>
@@ -111,7 +128,7 @@ export default function Home() {
                                     </TableHead>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell align="center" sx={{ fontStyle: 'italic', color: 'textSecondary' }}>Tạo mã QR VietQR miễn phí <br/> cho mọi mục đích sử dụng</TableCell>
+                                            <TableCell align="center" sx={{ fontStyle: 'italic', color: 'textSecondary' }}>Liên kết tạo mã QR miễn phí <br/> nhanh chóng để gửi khách hàng</TableCell>
                                             <TableCell align="center" sx={{ fontStyle: 'italic', color: 'textSecondary' }}>Mở rộng với các tính năng <br/> cao cấp và tiện ích hơn</TableCell>
                                             <TableCell align="center" sx={{ fontStyle: 'italic', color: 'textSecondary' }}>Giải pháp toàn diện cho <br/> doanh nghiệp và tổ chức</TableCell>
                                         </TableRow>
@@ -122,12 +139,14 @@ export default function Home() {
                                         </TableRow>
                                         <TableRow>
                                             <TableCell align="left">
-                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Tạo mã QR VietQR</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Tạo mã QR chuyển tiền</Typography>
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Số tiền tùy chọn</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Nội dung chuyển khoản tùy chọn</Typography>
                                             </TableCell>
                                             <TableCell align="left">
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Lưu lịch sử giao dịch</Typography>
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Xác thực giao dịch tự dộng</Typography>
+                                                <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Đang trong quá trình phát triển</Typography>
                                             </TableCell>
                                             <TableCell align="left">
                                                 <Typography><span style={{ fontWeight: 'bold', marginRight: '5px' }}>✔</span>Self-Host</Typography>
@@ -157,25 +176,6 @@ export default function Home() {
                                 Email: <Link href="mailto:me@cvutn.net" passHref><Typography variant="inherit" color="primary">me@vutn.net</Typography></Link>
                             </Typography>
                             {/* You can add other contact methods here, like phone number, contact form link, etc. */}
-                        </Box>
-
-                        <Box sx={{ mt: 4 }}>
-                            <Grid container spacing={2} justifyContent="center">
-                                <Grid item>
-                                    <Link href="/login" passHref>
-                                        <Button variant="contained" color="primary" size="large">
-                                            Đăng nhập
-                                        </Button>
-                                    </Link>
-                                </Grid>
-                                <Grid item>
-                                    <Link href="/register" passHref>
-                                        <Button variant="outlined" color="primary" size="large">
-                                            Đăng ký
-                                        </Button>
-                                    </Link>
-                                </Grid>
-                            </Grid>
                         </Box>
                     </animated.div>
                 </Box>
