@@ -39,13 +39,13 @@ export default function Home() {
                     __html: `
                     window.difyChatbotConfig = {
                         token: 'RYQJ17la3WbLC90z',
-                        baseUrl: 'http://studio.vutn.net'
+                        baseUrl: 'https://studio.vutn.net'
                     };
                     `,
                 }}
                 />
                 <script
-                src="http://studio.vutn.net/embed.min.js"
+                src="https://studio.vutn.net/embed.min.js"
                 id="RYQJ17la3WbLC90z"
                 defer
                 />
