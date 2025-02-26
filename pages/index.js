@@ -1,6 +1,7 @@
 import { Container, Typography, Box, Button, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, useMediaQuery } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
+import Head from 'next/head';
 import { useSpring, animated } from 'react-spring';
 import Meta from '../components/Meta';
 
@@ -32,6 +33,34 @@ export default function Home() {
                 ogImage="/qr-code-animation.gif"
                 ogUrl="https://maqr.top"
             />
+            <Head>
+                <script
+                dangerouslySetInnerHTML={{
+                    __html: `
+                    window.difyChatbotConfig = {
+                        token: 'RYQJ17la3WbLC90z',
+                        baseUrl: 'http://studio.vutn.net'
+                    };
+                    `,
+                }}
+                />
+                <script
+                src="http://studio.vutn.net/embed.min.js"
+                id="RYQJ17la3WbLC90z"
+                defer
+                />
+                <style>
+                {`
+                    #dify-chatbot-bubble-button {
+                    background-color: #1C64F2 !important;
+                    }
+                    #dify-chatbot-bubble-window {
+                    width: 24rem !important;
+                    height: 40rem !important;
+                    }
+                `}
+                </style>
+            </Head>
             <Container maxWidth="md">
                 <Box
                     sx={{
